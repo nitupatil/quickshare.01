@@ -4,19 +4,30 @@ import { supabaseUrl, supabaseKey } from './config.js';
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// --- 3-Second Magic Intro Animation ---
+// --- 3-Second Magic Intro & Transition Logic ---
 window.addEventListener('load', () => {
     const intro = document.getElementById('intro-animation');
-    // Check if they came via QR code link OR if they already saw it this session
+    const appContainer = document.getElementById('app-container');
     const urlParams = new URLSearchParams(window.location.search);
-    if (!sessionStorage.getItem('magicIntroPlayed') && !urlParams.get('pin')) {
+
+    const triggerAppEntrance = () => {
+        intro.classList.add('intro-fade-out');
         setTimeout(() => {
-            intro.classList.add('intro-fade-out');
-            setTimeout(() => intro.style.display = 'none', 500); // Remove from DOM flow
-        }, 3000);
+            intro.style.display = 'none';
+            // Slide in the main interface smoothly
+            appContainer.style.opacity = '1';
+            appContainer.style.transform = 'translateY(0)';
+        }, 500); 
+    };
+
+    // If new user, play intro. If returning or scanning QR, skip directly to app.
+    if (!sessionStorage.getItem('magicIntroPlayed') && !urlParams.get('pin')) {
+        setTimeout(triggerAppEntrance, 3000); 
         sessionStorage.setItem('magicIntroPlayed', 'true');
     } else {
-        intro.style.display = 'none'; // Skip intro
+        intro.style.display = 'none';
+        appContainer.style.opacity = '1';
+        appContainer.style.transform = 'translateY(0)';
     }
 });
 
@@ -121,7 +132,6 @@ uploadBtn.addEventListener('click', async () => {
 
     uploadBtn.disabled = true;
     
-    // Trigger Rocket Animation
     const actionIcon = document.getElementById('action-icon-send');
     actionIcon.classList.add('launching');
     document.getElementById('upload-text').innerText = 'Uploading files...';
@@ -273,7 +283,6 @@ window.downloadAllFiles = async function() {
     const btnIcon = document.getElementById('dl-icon');
     const btnText = document.getElementById('dl-text');
     
-    // Parachute visual logic
     btnIcon.innerText = '🪂'; 
     btnIcon.className = 'action-icon parachute dropping';
     btnText.innerText = 'Fetching files...';
@@ -285,7 +294,6 @@ window.downloadAllFiles = async function() {
         await new Promise(r => setTimeout(r, 600)); 
     }
     
-    // Reset button after 3 seconds
     setTimeout(() => {
         btnIcon.className = 'action-icon';
         btnIcon.innerText = '📦';
