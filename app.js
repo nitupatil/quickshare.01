@@ -123,7 +123,7 @@ function subscribeToRealtime(shareId) {
     .subscribe();
 }
 
-// --- Download Flow (Updated with robust error handling) ---
+// --- Download Flow (Hidden URL / Direct File Blob Method) ---
 downloadBtn.addEventListener('click', async () => {
     const pin = document.getElementById('receiver-pin').value;
     const otp = document.getElementById('receiver-otp').value;
@@ -141,26 +141,37 @@ downloadBtn.addEventListener('click', async () => {
         if (!data || data.length === 0) throw new Error('Invalid credentials or files expired.');
 
         const filePaths = data[0].files;
-        statusText.innerText = 'Credentials verified. Generating downloads...';
+        statusText.innerText = 'Credentials verified. Downloading files securely...';
         statusText.style.color = '#10b981'; // Green
 
-        // Get signed URLs and trigger download
+        // Fetch the file in the background and trigger forced download
         for (let path of filePaths) {
             const { data: urlData, error: urlError } = await supabase.storage.from('quickshares_files').createSignedUrl(path, 60);
             
-            // If Supabase blocks the download, throw the error to show it on screen
             if (urlError) throw new Error('Storage error: ' + urlError.message);
 
             if (urlData) {
-                const a = document.createElement('a');
-                a.href = urlData.signedUrl;
+                // Fetch the actual file blob securely
+                const response = await fetch(urlData.signedUrl);
+                if (!response.ok) throw new Error('Network response was not ok');
+                const blob = await response.blob();
                 
-                // Add download attribute to force download instead of opening in tab
-                // We split off the timestamp to give them back the original file name
+                // Create a temporary object URL that hides the real backend path
+                const localUrl = window.URL.createObjectURL(blob);
+                
+                // Create an invisible link to trigger the download prompt
+                const a = document.createElement('a');
+                a.href = localUrl;
+                
+                // Extract original filename (removing your generated timestamp)
                 a.download = path.split('_').slice(1).join('_'); 
+                
                 document.body.appendChild(a);
                 a.click();
+                
+                // Clean up the browser memory immediately after starting download
                 a.remove();
+                window.URL.revokeObjectURL(localUrl);
             }
         }
         
