@@ -105,6 +105,7 @@ function startTimer(duration) {
         if (--timer < 0) {
             clearInterval(interval);
             display.textContent = "EXPIRED";
+            display.style.color = "#64748b";
         }
     }, 1000);
 }
@@ -122,7 +123,7 @@ function subscribeToRealtime(shareId) {
     .subscribe();
 }
 
-// --- Download Flow ---
+// --- Download Flow (Updated with robust error handling) ---
 downloadBtn.addEventListener('click', async () => {
     const pin = document.getElementById('receiver-pin').value;
     const otp = document.getElementById('receiver-otp').value;
@@ -136,9 +137,8 @@ downloadBtn.addEventListener('click', async () => {
     try {
         const { data, error } = await supabase.rpc('verify_and_download', { p_pin: pin, p_otp: otp });
         
-        if (error || !data || data.length === 0) {
-            throw new Error('Invalid credentials or files expired.');
-        }
+        if (error) throw new Error('Database error: ' + error.message);
+        if (!data || data.length === 0) throw new Error('Invalid credentials or files expired.');
 
         const filePaths = data[0].files;
         statusText.innerText = 'Credentials verified. Generating downloads...';
@@ -146,11 +146,17 @@ downloadBtn.addEventListener('click', async () => {
 
         // Get signed URLs and trigger download
         for (let path of filePaths) {
-            const { data: urlData } = await supabase.storage.from('quickshares_files').createSignedUrl(path, 60);
+            const { data: urlData, error: urlError } = await supabase.storage.from('quickshares_files').createSignedUrl(path, 60);
+            
+            // If Supabase blocks the download, throw the error to show it on screen
+            if (urlError) throw new Error('Storage error: ' + urlError.message);
+
             if (urlData) {
                 const a = document.createElement('a');
                 a.href = urlData.signedUrl;
+                
                 // Add download attribute to force download instead of opening in tab
+                // We split off the timestamp to give them back the original file name
                 a.download = path.split('_').slice(1).join('_'); 
                 document.body.appendChild(a);
                 a.click();
@@ -158,11 +164,13 @@ downloadBtn.addEventListener('click', async () => {
             }
         }
         
+        statusText.innerText = 'Download complete!';
         downloadBtn.innerText = 'Download Files';
         downloadBtn.disabled = false;
         
     } catch (err) {
         statusText.innerText = err.message;
+        statusText.style.color = '#ef4444'; // Red
         downloadBtn.innerText = 'Download Files';
         downloadBtn.disabled = false;
     }
