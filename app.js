@@ -4,6 +4,22 @@ import { supabaseUrl, supabaseKey } from './config.js';
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+// --- 3-Second Magic Intro Animation ---
+window.addEventListener('load', () => {
+    const intro = document.getElementById('intro-animation');
+    // Check if they came via QR code link OR if they already saw it this session
+    const urlParams = new URLSearchParams(window.location.search);
+    if (!sessionStorage.getItem('magicIntroPlayed') && !urlParams.get('pin')) {
+        setTimeout(() => {
+            intro.classList.add('intro-fade-out');
+            setTimeout(() => intro.style.display = 'none', 500); // Remove from DOM flow
+        }, 3000);
+        sessionStorage.setItem('magicIntroPlayed', 'true');
+    } else {
+        intro.style.display = 'none'; // Skip intro
+    }
+});
+
 // --- History API (Fixes Mobile Back Button) ---
 if (!history.state) { history.replaceState({ view: 'view-landing' }, '', '/'); }
 
@@ -18,17 +34,12 @@ window.navTo = function(viewId, pushHistory = true) {
 };
 
 window.addEventListener('popstate', (e) => {
-    // If preview modal is open, phone back button closes modal first
     if (document.getElementById('preview-modal').style.display === 'flex') {
         document.getElementById('preview-modal').style.display = 'none';
         document.getElementById('preview-content').innerHTML = ''; 
     } 
-    // Otherwise go to the previous screen
-    else if (e.state && e.state.view) {
-        navTo(e.state.view, false);
-    } else {
-        navTo('view-landing', false);
-    }
+    else if (e.state && e.state.view) { navTo(e.state.view, false); } 
+    else { navTo('view-landing', false); }
 });
 
 // --- QR Code Auto-Scan Logic ---
@@ -44,6 +55,7 @@ window.onload = () => {
 
 const playSwoosh = () => document.getElementById('sound-upload').play().catch(()=>{});
 const playDing = () => document.getElementById('sound-unlock').play().catch(()=>{});
+const playDownload = () => document.getElementById('sound-download').play().catch(()=>{});
 
 // --- File Drag & Drop (Send Flow) ---
 let selectedFilesArray = [];
@@ -99,7 +111,7 @@ function renderFileList() {
     }
 }
 
-// --- Upload to Supabase ---
+// --- Upload to Supabase with Visuals ---
 uploadBtn.addEventListener('click', async () => {
     const pin = document.getElementById('sender-pin').value;
     const maxDownloads = document.getElementById('max-downloads').value || 2;
@@ -108,8 +120,11 @@ uploadBtn.addEventListener('click', async () => {
     if (selectedFilesArray.length === 0) return alert('Add files first!');
 
     uploadBtn.disabled = true;
-    document.getElementById('rocket-icon').classList.add('launching');
-    document.getElementById('upload-text').innerText = 'Uploading...';
+    
+    // Trigger Rocket Animation
+    const actionIcon = document.getElementById('action-icon-send');
+    actionIcon.classList.add('launching');
+    document.getElementById('upload-text').innerText = 'Uploading files...';
 
     try {
         let filePaths = [];
@@ -128,7 +143,7 @@ uploadBtn.addEventListener('click', async () => {
         if (dbError) throw dbError;
 
         playSwoosh();
-        document.getElementById('rocket-icon').classList.remove('launching');
+        actionIcon.classList.remove('launching');
 
         document.getElementById('display-pin').innerText = shareData.pin;
         document.getElementById('display-otp').innerText = shareData.otp;
@@ -136,7 +151,7 @@ uploadBtn.addEventListener('click', async () => {
         
         document.getElementById('qrcode').innerHTML = '';
         const magicLink = `${window.location.origin}${window.location.pathname}?pin=${shareData.pin}&otp=${shareData.otp}`;
-        new QRCode(document.getElementById('qrcode'), { text: magicLink, width: 130, height: 130 });
+        new QRCode(document.getElementById('qrcode'), { text: magicLink, width: 140, height: 140, colorDark: "#1E293B", colorLight: "#ffffff" });
 
         navTo('view-active');
         startTimer(300); 
@@ -144,8 +159,9 @@ uploadBtn.addEventListener('click', async () => {
 
     } catch (err) {
         alert('Upload failed: ' + err.message);
-        document.getElementById('rocket-icon').classList.remove('launching');
+        actionIcon.classList.remove('launching');
         uploadBtn.disabled = false;
+        document.getElementById('upload-text').innerText = 'Upload Securely';
     }
 });
 
@@ -224,9 +240,7 @@ function renderVault() {
 
 // --- Preview & Print Engine ---
 window.openPreview = function(index) {
-    // Push dummy state so phone back button triggers a 'popstate' and closes this modal
     history.pushState({ modal: true }, '', '#preview'); 
-    
     const file = vaultFilesData[index];
     document.getElementById('preview-title').innerText = file.name;
     const modal = document.getElementById('preview-modal');
@@ -251,22 +265,32 @@ window.openPreview = function(index) {
 };
 
 window.closePreview = function() {
-    if(history.state && history.state.modal) {
-        history.back(); // Triggers the popstate event to clean up properly
-    } else {
-        document.getElementById('preview-modal').style.display = 'none';
-        document.getElementById('preview-content').innerHTML = '';
-    }
+    if(history.state && history.state.modal) { history.back(); } 
+    else { document.getElementById('preview-modal').style.display = 'none'; document.getElementById('preview-content').innerHTML = ''; }
 };
 
 window.downloadAllFiles = async function() {
-    const btn = document.querySelector('#view-vault .action-btn');
-    btn.innerText = 'Downloading...';
+    const btnIcon = document.getElementById('dl-icon');
+    const btnText = document.getElementById('dl-text');
+    
+    // Parachute visual logic
+    btnIcon.innerText = '🪂'; 
+    btnIcon.className = 'action-icon parachute dropping';
+    btnText.innerText = 'Fetching files...';
+
+    playDownload();
+
     for(let file of vaultFilesData) {
         await downloadSilent(file.url, file.name);
-        await new Promise(r => setTimeout(r, 500)); // slight delay prevents browsers from blocking multiple downloads
+        await new Promise(r => setTimeout(r, 600)); 
     }
-    btn.innerText = '⬇️ Download All Files';
+    
+    // Reset button after 3 seconds
+    setTimeout(() => {
+        btnIcon.className = 'action-icon';
+        btnIcon.innerText = '📦';
+        btnText.innerText = 'Download All Files';
+    }, 2000);
 };
 
 window.downloadSilent = async function(url, filename) {
