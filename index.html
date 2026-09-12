@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quickshares.online | 5-Minute File Transfer</title>
+    <style>
+        :root { --bg: #f8fafc; --primary: #2563eb; --text: #0f172a; --card: #ffffff; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+        .logo { font-size: 24px; font-weight: bold; margin-bottom: 40px; color: var(--primary); }
+        .container { background: var(--card); padding: 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); width: 100%; max-width: 400px; text-align: center; }
+        
+        /* Drag & Drop Area */
+        .drop-zone { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 40px 20px; cursor: pointer; transition: all 0.2s; margin-bottom: 20px; }
+        .drop-zone.dragover { border-color: var(--primary); background: #eff6ff; }
+        .drop-zone p { margin: 0; color: #64748b; font-size: 14px; }
+        
+        /* Inputs & Buttons */
+        input[type="text"], input[type="number"], input[type="file"] { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; font-size: 16px; text-align: center; }
+        button { background: var(--primary); color: white; border: none; padding: 14px; width: 100%; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.2s; margin-top: 10px; }
+        button:hover { background: #1d4ed8; }
+        
+        /* Layout Tabs */
+        .tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; }
+        .tab { flex: 1; padding: 10px; cursor: pointer; font-weight: 600; color: #64748b; }
+        .tab.active { color: var(--primary); border-bottom: 2px solid var(--primary); margin-bottom: -2px; }
+        
+        .view { display: none; }
+        .view.active { display: block; }
+
+        /* Timer & OTP UI */
+        .stats-box { background: #eff6ff; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .otp-display { font-size: 32px; font-weight: bold; letter-spacing: 4px; color: var(--primary); margin: 10px 0; }
+        .timer { font-size: 20px; font-weight: bold; color: #ef4444; }
+
+        /* Footer */
+        footer { margin-top: auto; padding: 20px 0; font-size: 13px; display: flex; gap: 15px; }
+        footer a { color: #64748b; text-decoration: none; }
+        footer a:hover { color: var(--primary); }
+    </style>
+</head>
+<body>
+
+    <div class="logo">Quickshares.online</div>
+
+    <div class="container">
+        <!-- Send / Receive Tabs -->
+        <div id="nav-tabs" class="tabs">
+            <div class="tab active" onclick="switchTab('send')">Send File</div>
+            <div class="tab" onclick="switchTab('receive')">Receive File</div>
+        </div>
+
+        <!-- 1. Send View -->
+        <div id="view-send" class="view active">
+            <div id="drop-zone" class="drop-zone" onclick="document.getElementById('file-input').click()">
+                <p id="file-label">Drag & Drop files here (Max 50MB)<br>or click to browse</p>
+                <input type="file" id="file-input" multiple hidden>
+            </div>
+            <input type="text" id="sender-pin" maxlength="4" placeholder="Create 4-Digit PIN (e.g. 1234)">
+            <input type="number" id="max-downloads" placeholder="Max Downloads (Default: 2)">
+            <button id="upload-btn">Upload & Generate OTP</button>
+        </div>
+
+        <!-- 2. Active Session View (Sender waiting for receiver) -->
+        <div id="view-active" class="view">
+            <h3>Files Uploaded!</h3>
+            <p>Tell the receiver to enter this PIN and OTP:</p>
+            <div class="stats-box">
+                <div>PIN: <strong id="display-pin"></strong></div>
+                <div class="otp-display" id="display-otp">----</div>
+                <div>Downloads: <span id="download-count">0</span> / <span id="download-max">2</span></div>
+            </div>
+            <p>Files self-destruct in:</p>
+            <div class="timer" id="timer">05:00</div>
+            <button onclick="location.reload()" style="background: #ef4444;">Close Session</button>
+        </div>
+
+        <!-- 3. Receive View -->
+        <div id="view-receive" class="view">
+            <input type="text" id="receiver-pin" maxlength="4" placeholder="Enter 4-Digit PIN">
+            <input type="text" id="receiver-otp" maxlength="4" placeholder="Enter 4-Digit OTP">
+            <button id="download-btn">Download Files</button>
+            <p id="receive-status" style="color: #ef4444; font-size: 14px; margin-top: 10px;"></p>
+        </div>
+    </div>
+
+    <!-- Clean URL references for static pages -->
+    <footer>
+        <a href="/about">About</a>
+        <a href="/contact">Contact</a>
+        <a href="/privacy">Privacy Policy</a>
+    </footer>
+
+    <!-- Load Supabase as ES Module and Link our Logic -->
+    <script type="module" src="app.js"></script>
+    <script>
+        function switchTab(tab) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(`view-${tab}`).classList.add('active');
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>
