@@ -4,435 +4,166 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quickshares.online | Magic File Transfer</title>
+    <!-- QR Code Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        /* CSS Variables & Global */
-        :root {
-            --primary: #4F46E5;
-            --primary-hover: #4338CA;
-            --bg-glass: rgba(255, 255, 255, 0.7);
-            --bg-glass-hover: rgba(255, 255, 255, 0.9);
-            --text-main: #1E293B;
-            --text-muted: #64748B;
-            --danger: #EF4444;
-        }
-        body, html {
-            margin: 0; padding: 0; height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            color: var(--text-main);
-            overflow-x: hidden;
-        }
+        :root { --primary: #4F46E5; --primary-hover: #4338CA; --bg-glass: rgba(255, 255, 255, 0.7); --text-main: #1E293B; --text-muted: #64748B; --danger: #EF4444; }
+        body, html { margin: 0; padding: 0; height: 100%; font-family: -apple-system, system-ui, sans-serif; color: var(--text-main); overflow-x: hidden; }
 
-        /* 1. Animated Mesh Gradient Background */
-        .animated-bg {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -2;
-            background: linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%);
-            background-size: 400% 400%;
-            animation: gradientMove 15s ease infinite;
-        }
-        @keyframes gradientMove {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
+        /* Animated Mesh Background */
+        .animated-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -2; background: linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%); background-size: 400% 400%; animation: gradientMove 15s ease infinite; }
+        @keyframes gradientMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
-        /* Floating Background Icons */
-        .floating-icons {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none;
-        }
-        .float-icon {
-            position: absolute; font-size: 40px; opacity: 0.15;
-            animation: float 8s ease-in-out infinite;
-        }
-        .icon-1 { top: 15%; left: 10%; animation-delay: 0s; }
-        .icon-2 { top: 70%; left: 15%; animation-delay: 2s; }
-        .icon-3 { top: 20%; right: 15%; animation-delay: 4s; }
-        .icon-4 { top: 75%; right: 10%; animation-delay: 1s; }
-        @keyframes float {
-            0% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-30px) rotate(10deg); }
-            100% { transform: translateY(0px) rotate(0deg); }
-        }
+        /* Floating Icons */
+        .floating-icons { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; }
+        .float-icon { position: absolute; font-size: 40px; opacity: 0.15; animation: float 8s ease-in-out infinite; }
+        .icon-1 { top: 15%; left: 10%; animation-delay: 0s; } .icon-2 { top: 70%; left: 15%; animation-delay: 2s; }
+        .icon-3 { top: 20%; right: 15%; animation-delay: 4s; } .icon-4 { top: 75%; right: 10%; animation-delay: 1s; }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-30px); } }
 
-        /* 2. Glassmorphism Main Container */
-        .app-container {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            min-height: 100vh; padding: 20px; box-sizing: border-box;
-        }
-        .logo { font-size: 32px; font-weight: 800; margin-bottom: 40px; color: #1E293B; letter-spacing: -1px; }
-        
-        .glass-panel {
-            background: var(--bg-glass);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            border-radius: 24px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.05);
-            width: 100%; max-width: 500px;
-            padding: 40px; box-sizing: border-box;
-            transition: all 0.3s ease;
-        }
+        /* Main Container & Glass */
+        .app-container { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; box-sizing: border-box; }
+        .logo { font-size: 32px; font-weight: 800; margin-bottom: 40px; color: #1E293B; letter-spacing: -1px; text-shadow: 0 2px 10px rgba(255,255,255,0.5); }
+        .glass-panel { background: var(--bg-glass); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); width: 100%; max-width: 500px; padding: 40px; box-sizing: border-box; }
 
-        /* 3. Split Screen Landing */
-        .split-landing { display: flex; gap: 20px; }
-        .split-btn {
-            flex: 1; background: var(--bg-glass); border: 2px solid transparent;
-            padding: 40px 20px; border-radius: 16px; cursor: pointer;
-            text-align: center; transition: 0.3s;
-            font-size: 18px; font-weight: 600; color: var(--text-main);
-        }
-        .split-btn:hover { background: var(--bg-glass-hover); border-color: var(--primary); transform: translateY(-5px); }
-        .split-btn span { display: block; font-size: 48px; margin-bottom: 15px; }
-
-        /* View Management */
+        /* Navigation & Views */
         .view { display: none; opacity: 0; transition: opacity 0.3s; }
         .view.active { display: block; opacity: 1; animation: fadeIn 0.4s forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Shared UI Elements */
-        input {
-            width: 100%; padding: 16px; margin: 10px 0;
-            background: rgba(255,255,255,0.8); border: 1px solid rgba(0,0,0,0.1);
-            border-radius: 12px; font-size: 16px; box-sizing: border-box;
-            transition: 0.2s;
-        }
-        input:focus { outline: none; border-color: var(--primary); background: #fff; }
-        input[type="text"] { text-align: center; letter-spacing: 2px; font-weight: bold; }
         
-        button.action-btn {
-            background: var(--primary); color: white; border: none;
-            padding: 16px; width: 100%; border-radius: 12px; font-size: 16px; font-weight: 600;
-            cursor: pointer; transition: 0.2s; margin-top: 15px; display: flex; justify-content: center; align-items: center; gap: 10px;
-        }
-        button.action-btn:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 10px 20px rgba(79, 70, 229, 0.2); }
-        
-        .back-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-weight: 600; margin-bottom: 20px; display: flex; align-items: center; gap: 5px; }
-        .back-btn:hover { color: var(--text-main); }
+        .split-landing { display: flex; gap: 20px; }
+        .split-btn { flex: 1; background: var(--bg-glass); padding: 40px 20px; border-radius: 16px; cursor: pointer; text-align: center; font-size: 18px; font-weight: 600; transition: 0.3s; border: 2px solid transparent; }
+        .split-btn:hover { background: rgba(255,255,255,0.9); border-color: var(--primary); transform: translateY(-5px); }
+        .split-btn span { display: block; font-size: 48px; margin-bottom: 15px; }
 
-        /* 4. Send Flow: File List & Drag Drop */
-        .fullscreen-drop {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(79, 70, 229, 0.9); z-index: 999; display: none;
-            justify-content: center; align-items: center; color: white; font-size: 32px; font-weight: bold;
-        }
+        /* Inputs & Buttons */
+        input { width: 100%; padding: 16px; margin: 10px 0; background: rgba(255,255,255,0.8); border: 1px solid rgba(0,0,0,0.1); border-radius: 12px; font-size: 16px; box-sizing: border-box; text-align: center; }
+        button.action-btn { background: var(--primary); color: white; border: none; padding: 16px; width: 100%; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 15px; display: flex; justify-content: center; gap: 10px; align-items: center; }
+        button.action-btn:hover:not(:disabled) { background: var(--primary-hover); transform: translateY(-2px); }
+        button:disabled { opacity: 0.7; cursor: not-allowed; }
+        .back-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-weight: 600; margin-bottom: 20px; }
+
+        /* File List UI */
+        .fullscreen-drop { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(79, 70, 229, 0.9); z-index: 999; display: none; justify-content: center; align-items: center; color: white; font-size: 32px; font-weight: bold; }
         .file-list { margin: 15px 0; max-height: 200px; overflow-y: auto; }
-        .file-item {
-            display: flex; align-items: center; justify-content: space-between;
-            background: rgba(255,255,255,0.6); padding: 12px; border-radius: 10px; margin-bottom: 8px;
-        }
-        .file-info { display: flex; align-items: center; gap: 10px; overflow: hidden; }
-        .file-name { font-weight: 500; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
-        .file-size { font-size: 12px; color: var(--text-muted); }
-        .remove-btn { background: #fee2e2; color: var(--danger); border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-        
-        .add-more-btn { background: none; border: 2px dashed #cbd5e1; color: var(--text-muted); padding: 12px; width: 100%; border-radius: 10px; cursor: pointer; font-weight: 600; transition: 0.2s; }
-        .add-more-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .file-item { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.6); padding: 12px; border-radius: 10px; margin-bottom: 8px; }
+        .remove-btn { background: #fee2e2; color: var(--danger); border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-weight: bold; }
+        .add-more-btn { background: none; border: 2px dashed #cbd5e1; color: var(--text-muted); padding: 12px; width: 100%; border-radius: 10px; cursor: pointer; font-weight: 600; }
 
-        /* 5. Active Session & QR Code */
-        .qr-placeholder { background: white; padding: 20px; border-radius: 16px; margin: 20px auto; width: 150px; height: 150px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .credentials-box { text-align: center; margin-bottom: 20px; }
-        .pin-display { font-size: 24px; font-weight: bold; }
-        .otp-display { font-size: 48px; font-weight: 900; color: var(--primary); letter-spacing: 8px; margin: 10px 0; }
-        
-        /* 6. Receiver File Vault (Preview Engine) */
+        /* Session UI (Timers & QR) */
+        .qr-placeholder { background: white; padding: 15px; border-radius: 16px; margin: 20px auto; width: 160px; height: 160px; display: flex; justify-content: center; align-items: center; }
+        .otp-display { font-size: 42px; font-weight: 900; color: var(--primary); letter-spacing: 6px; }
+        .stats-row { display: flex; justify-content: space-around; background: rgba(255,255,255,0.5); padding: 15px; border-radius: 12px; margin-bottom: 15px; font-weight: bold; }
+        .timer-red { color: var(--danger); }
+
+        /* Vault & Preview */
         .vault-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
-        .vault-item {
-            background: white; border-radius: 12px; padding: 15px; text-align: center;
-            cursor: pointer; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }
-        .vault-item:hover { transform: translateY(-3px); box-shadow: 0 10px 15px rgba(0,0,0,0.1); }
-        .vault-icon { font-size: 40px; margin-bottom: 10px; }
-        
-        /* 7. Fullscreen Preview Modal */
-        .preview-modal {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(15, 23, 42, 0.95); z-index: 1000; display: none;
-            flex-direction: column; padding: 20px; box-sizing: border-box;
-        }
-        .preview-header { display: flex; justify-content: space-between; color: white; margin-bottom: 20px; }
-        .close-modal { background: none; border: none; color: white; font-size: 32px; cursor: pointer; }
-        .preview-content { flex: 1; display: flex; justify-content: center; align-items: center; overflow: hidden; margin-bottom: 20px; }
+        .vault-item { background: white; border-radius: 12px; padding: 15px; text-align: center; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .preview-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.95); z-index: 1000; display: none; flex-direction: column; padding: 20px; box-sizing: border-box; }
+        .preview-header { display: flex; justify-content: space-between; color: white; }
+        .preview-content { flex: 1; display: flex; justify-content: center; align-items: center; padding: 20px 0; }
         .preview-content img, .preview-content video, .preview-content iframe { max-width: 100%; max-height: 100%; border-radius: 8px; }
-        .preview-actions { display: flex; gap: 15px; justify-content: center; padding-bottom: 40px; }
-        .preview-actions button {
-            background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2);
-            padding: 12px 24px; border-radius: 8px; font-size: 16px; cursor: pointer; display: flex; gap: 8px; align-items: center; transition: 0.2s;
-        }
-        .preview-actions button:hover { background: white; color: black; }
+        .preview-actions button { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 12px 24px; border-radius: 8px; cursor: pointer; margin: 0 10px; font-size: 16px;}
         .preview-actions button.primary { background: var(--primary); border: none; }
-        .preview-actions button.primary:hover { background: var(--primary-hover); color: white; }
 
-        /* Animations */
-        .anim-rocket { display: inline-block; animation: shake 0.5s infinite; }
-        @keyframes shake { 0% { transform: translate(1px, 1px) rotate(0deg); } 50% { transform: translate(-1px, -2px) rotate(-1deg); } 100% { transform: translate(1px, -1px) rotate(1deg); } }
-
+        /* Rocket Animation */
+        .rocket { display: inline-block; transition: all 0.3s; }
+        .rocket.launching { animation: launch 1.5s forwards; }
+        @keyframes launch { 0% { transform: translateY(0) scale(1); } 30% { transform: translateY(5px) scale(1.1); } 100% { transform: translateY(-50px) scale(0.5) opacity(0); } }
     </style>
 </head>
 <body>
 
-    <!-- Backgrounds -->
+    <!-- Sounds (Using lightweight public CDNs for quick swoosh and dings) -->
+    <audio id="sound-upload" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" preload="auto"></audio>
+    <audio id="sound-unlock" src="https://assets.mixkit.co/active_storage/sfx/2190/2190-preview.mp3" preload="auto"></audio>
+
     <div class="animated-bg"></div>
     <div class="floating-icons">
-        <div class="float-icon icon-1">📄</div>
-        <div class="float-icon icon-2">🖼️</div>
-        <div class="float-icon icon-3">🎥</div>
-        <div class="float-icon icon-4">🔒</div>
+        <div class="float-icon icon-1">📄</div><div class="float-icon icon-2">🖼️</div>
+        <div class="float-icon icon-3">🎥</div><div class="float-icon icon-4">🔒</div>
     </div>
-
-    <!-- Drag & Drop Fullscreen Overlay -->
     <div id="fullscreen-drop" class="fullscreen-drop">DROP FILES TO UPLOAD</div>
 
     <div class="app-container">
         <div class="logo">Quickshares.online</div>
-
         <div class="glass-panel">
             
-            <!-- View 1: Initial Split Screen -->
+            <!-- View 1: Landing -->
             <div id="view-landing" class="view active">
                 <div class="split-landing">
-                    <div class="split-btn" onclick="navTo('view-send')">
-                        <span>📤</span> I want to Send
-                    </div>
-                    <div class="split-btn" onclick="navTo('view-receive')">
-                        <span>📥</span> I want to Receive
-                    </div>
+                    <div class="split-btn" onclick="navTo('view-send')"><span>📤</span> Send</div>
+                    <div class="split-btn" onclick="navTo('view-receive')"><span>📥</span> Receive</div>
                 </div>
             </div>
 
-            <!-- View 2: Send Flow (Select Files) -->
+            <!-- View 2: Send / Select -->
             <div id="view-send" class="view">
                 <button class="back-btn" onclick="navTo('view-landing')">← Back</button>
-                <h2 style="margin-top:0;">Select Files</h2>
-                
-                <div id="file-list-container" class="file-list">
-                    <!-- File items injected here by JS -->
-                </div>
-                
+                <div id="file-list-container" class="file-list"></div>
                 <input type="file" id="file-input" multiple hidden>
-                <button class="add-more-btn" onclick="document.getElementById('file-input').click()">+ Add Files (Max 50MB total)</button>
+                <button class="add-more-btn" onclick="document.getElementById('file-input').click()">+ Add Files (Max 50MB)</button>
                 
-                <div style="margin-top: 20px;">
-                    <input type="text" id="sender-pin" maxlength="4" placeholder="Set a 4-Digit PIN (e.g. 1234)">
-                </div>
+                <input type="text" id="sender-pin" maxlength="4" placeholder="Set 4-Digit PIN (e.g. 1234)">
+                <input type="number" id="max-downloads" placeholder="Max Downloads (Default: 2)" style="margin-top:0;">
                 
                 <button id="upload-btn" class="action-btn">
-                    <span id="upload-icon">🚀</span> <span id="upload-text">Upload Securely</span>
+                    <span id="rocket-icon" class="rocket">🚀</span> <span id="upload-text">Upload Securely</span>
                 </button>
             </div>
 
-            <!-- View 3: Active Session (Waiting for receiver) -->
+            <!-- View 3: Active Sender Session -->
             <div id="view-active" class="view" style="text-align: center;">
-                <h2 style="margin-top:0; color: #10b981;">Ready to Share!</h2>
-                <p style="color: var(--text-muted);">Show this to the receiver or copy the link.</p>
+                <h2 style="margin-top:0; color: var(--primary);">Secure Link Active</h2>
+                <div class="stats-row">
+                    <div>⏱️ <span id="timer" class="timer-red">05:00</span></div>
+                    <div>📥 <span id="download-count">0</span> / <span id="download-max">2</span></div>
+                </div>
                 
-                <div class="qr-placeholder">
-                    [ QR Code Here ]
-                </div>
-
-                <div class="credentials-box">
-                    <div class="pin-display">PIN: <span id="display-pin">1234</span></div>
-                    <div class="otp-display" id="display-otp">8492</div>
-                </div>
-
-                <div style="display: flex; gap: 10px;">
-                    <button class="action-btn" style="background: #cbd5e1; color: black;" onclick="alert('Link Copied!')">🔗 Copy Link</button>
-                    <button class="action-btn" style="background: var(--danger);" onclick="location.reload()">End Session</button>
-                </div>
+                <div style="font-size: 14px; margin-bottom: 5px;">Scan to open, or type:</div>
+                <div style="font-size: 13px; color: var(--text-muted); font-weight: bold;">quickshares.online ➔ Receive ➔ Enter PIN & OTP</div>
+                
+                <div id="qrcode" class="qr-placeholder"></div>
+                
+                <div>PIN: <strong id="display-pin">----</strong></div>
+                <div class="otp-display" id="display-otp">----</div>
+                <button class="action-btn" style="background: var(--danger); margin-top: 10px;" onclick="location.reload()">End Session</button>
             </div>
 
-            <!-- View 4: Receive Flow (Enter PIN/OTP) -->
+            <!-- View 4: Receive Login -->
             <div id="view-receive" class="view">
                 <button class="back-btn" onclick="navTo('view-landing')">← Back</button>
                 <h2 style="margin-top:0;">Access Files</h2>
                 <input type="text" id="receiver-pin" maxlength="4" placeholder="Enter 4-Digit PIN">
                 <input type="text" id="receiver-otp" maxlength="4" placeholder="Enter 4-Digit OTP">
                 <button id="verify-btn" class="action-btn">Unlock Vault 🔓</button>
-                <p id="receive-status" style="text-align: center; margin-top: 10px; font-size: 14px;"></p>
+                <p id="receive-status" style="text-align: center; color: var(--danger);"></p>
             </div>
 
-            <!-- View 5: The File Vault (Receiver Previews) -->
+            <!-- View 5: Receiver Vault -->
             <div id="view-vault" class="view">
                 <button class="back-btn" onclick="location.reload()">← End Session</button>
                 <h2 style="margin-top:0;">File Vault</h2>
-                <p style="color: var(--text-muted); font-size: 14px;">Select a file to preview or print.</p>
-                
-                <div class="vault-grid">
-                    <!-- Example Mock Data (JS will populate this later) -->
-                    <div class="vault-item" onclick="openPreview('image', 'sample-image.jpg')">
-                        <div class="vault-icon">🖼️</div>
-                        <div class="file-name">design_v2.png</div>
-                    </div>
-                    <div class="vault-item" onclick="openPreview('pdf', 'sample-doc.pdf')">
-                        <div class="vault-icon">📄</div>
-                        <div class="file-name">contract.pdf</div>
-                    </div>
-                </div>
-
-                <button class="action-btn" style="margin-top: 30px;">⬇️ Download All (.zip)</button>
+                <p style="color: var(--text-muted); font-size: 14px;">Select a file to view or download.</p>
+                <div id="vault-grid" class="vault-grid"></div>
             </div>
 
         </div>
     </div>
-
-    <!-- Hidden Iframe for silent printing -->
-    <iframe id="print-frame" style="display:none;"></iframe>
 
     <!-- Fullscreen Preview Modal -->
     <div id="preview-modal" class="preview-modal">
         <div class="preview-header">
-            <div id="preview-title" style="font-size: 18px; font-weight: bold;">filename.ext</div>
-            <button class="close-modal" onclick="closePreview()">×</button>
+            <div id="preview-title" style="font-size: 18px; font-weight: bold;"></div>
+            <button class="close-modal" onclick="closePreview()" style="background:none; border:none; color:white; font-size:32px; cursor:pointer;">×</button>
         </div>
-        <div class="preview-content" id="preview-content">
-            <!-- Content injected here -->
-        </div>
-        <div class="preview-actions">
-            <!-- Dynamic buttons injected here based on type -->
-            <button id="preview-print-btn">🖨️ Print</button>
-            <button class="primary">⬇️ Download</button>
-        </div>
+        <div class="preview-content" id="preview-content"></div>
+        <div class="preview-actions" id="preview-actions" style="display:flex; justify-content:center;"></div>
     </div>
 
-    <!-- UI Logic Scripts (No Backend logic, just Visuals) -->
-    <script>
-        // Navigation
-        function navTo(viewId) {
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.getElementById(viewId).classList.add('active');
-        }
+    <!-- Hidden Iframe for Printing -->
+    <iframe id="print-frame" style="display:none;"></iframe>
 
-        // Global UI State
-        let selectedFilesArray = [];
-        const fileListContainer = document.getElementById('file-list-container');
-        const fileInput = document.getElementById('file-input');
-
-        // Drag and Drop UI Events
-        const dropOverlay = document.getElementById('fullscreen-drop');
-        window.addEventListener('dragenter', (e) => { e.preventDefault(); if(document.getElementById('view-send').classList.contains('active')) dropOverlay.style.display = 'flex'; });
-        dropOverlay.addEventListener('dragover', (e) => e.preventDefault());
-        dropOverlay.addEventListener('dragleave', (e) => { e.preventDefault(); dropOverlay.style.display = 'none'; });
-        dropOverlay.addEventListener('drop', (e) => {
-            e.preventDefault(); dropOverlay.style.display = 'none';
-            handleNewFiles(e.dataTransfer.files);
-        });
-
-        // File Input Select
-        fileInput.addEventListener('change', (e) => handleNewFiles(e.target.files));
-
-        function handleNewFiles(files) {
-            Array.from(files).forEach(file => {
-                // Prevent duplicates based on name and size
-                if (!selectedFilesArray.some(f => f.name === file.name && f.size === file.size)) {
-                    selectedFilesArray.push(file);
-                }
-            });
-            renderFileList();
-        }
-
-        function removeFile(index) {
-            selectedFilesArray.splice(index, 1);
-            renderFileList();
-        }
-
-        function renderFileList() {
-            fileListContainer.innerHTML = '';
-            let totalSize = 0;
-            
-            selectedFilesArray.forEach((file, index) => {
-                totalSize += file.size;
-                let icon = file.type.includes('image') ? '🖼️' : (file.type.includes('video') ? '🎥' : '📄');
-                
-                const item = document.createElement('div');
-                item.className = 'file-item';
-                item.innerHTML = `
-                    <div class="file-info">
-                        <span>${icon}</span>
-                        <div>
-                            <div class="file-name">${file.name}</div>
-                            <div class="file-size">${(file.size / 1024 / 1024).toFixed(2)} MB</div>
-                        </div>
-                    </div>
-                    <button class="remove-btn" onclick="removeFile(${index})">×</button>
-                `;
-                fileListContainer.appendChild(item);
-            });
-
-            // Demo upload button state change
-            const upBtn = document.getElementById('upload-btn');
-            if (totalSize > 50 * 1024 * 1024) {
-                upBtn.style.background = 'var(--danger)';
-                document.getElementById('upload-text').innerText = 'Size Exceeds 50MB';
-                upBtn.disabled = true;
-            } else {
-                upBtn.style.background = 'var(--primary)';
-                document.getElementById('upload-text').innerText = 'Upload Securely';
-                upBtn.disabled = false;
-            }
-        }
-
-        // Mock UI flow for Uploading -> Active Session
-        document.getElementById('upload-btn').addEventListener('click', () => {
-            if(selectedFilesArray.length === 0) return alert('Add files first!');
-            const icon = document.getElementById('upload-icon');
-            icon.classList.add('anim-rocket');
-            document.getElementById('upload-text').innerText = 'Uploading 0%...';
-            
-            // Mock percentage load for UI demo
-            let p = 0;
-            const int = setInterval(() => {
-                p += 10;
-                document.getElementById('upload-text').innerText = `Uploading ${p}%...`;
-                if(p >= 100) {
-                    clearInterval(int);
-                    navTo('view-active');
-                    icon.classList.remove('anim-rocket');
-                }
-            }, 150);
-        });
-
-        // Mock UI flow for Receive -> Vault
-        document.getElementById('verify-btn').addEventListener('click', () => {
-            document.getElementById('verify-btn').innerText = 'Unlocking...';
-            setTimeout(() => { navTo('view-vault'); }, 800);
-        });
-
-        // --- Preview Modal Engine ---
-        const modal = document.getElementById('preview-modal');
-        const previewContent = document.getElementById('preview-content');
-
-        function openPreview(type, filename) {
-            document.getElementById('preview-title').innerText = filename;
-            modal.style.display = 'flex';
-            
-            // Setup buttons based on type
-            const actionsDiv = document.querySelector('.preview-actions');
-            let actionHtml = '';
-
-            if(type === 'image') {
-                previewContent.innerHTML = `<div style="background: white; padding: 20px; border-radius: 8px;">[ Image Placeholder for ${filename} ]</div>`;
-                actionHtml = `<button onclick="printFile()">🖨️ Print</button> <button class="primary">⬇️ Download</button>`;
-            } 
-            else if(type === 'video') {
-                previewContent.innerHTML = `<div style="background: black; color: white; padding: 100px; border-radius: 8px;">▶️ [ Video Player Placeholder ]</div>`;
-                actionHtml = `<button class="primary">⬇️ Download</button>`; // Usually don't print videos
-            }
-            else if(type === 'pdf') {
-                previewContent.innerHTML = `<div style="background: white; padding: 100px; border-radius: 8px;">📄 [ PDF Document Placeholder ]</div>`;
-                actionHtml = `<button onclick="printFile()">🖨️ Print</button> <button class="primary">⬇️ Download</button>`;
-            }
-
-            actionsDiv.innerHTML = actionHtml;
-        }
-
-        function closePreview() {
-            modal.style.display = 'none';
-            previewContent.innerHTML = ''; // Clear media
-        }
-
-        function printFile() {
-            // Logic to print the currently previewed file
-            // Note: In real app, you inject the blob URL into an iframe and call iframe.contentWindow.print()
-            alert('Opening print dialog for this file...');
-        }
-    </script>
+    <script type="module" src="app.js"></script>
 </body>
 </html>
