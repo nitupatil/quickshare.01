@@ -4,185 +4,260 @@ import { supabaseUrl, supabaseKey } from './config.js';
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// UI Elements
-const fileInput = document.getElementById('file-input');
-const dropZone = document.getElementById('drop-zone');
-const fileLabel = document.getElementById('file-label');
-const uploadBtn = document.getElementById('upload-btn');
-const downloadBtn = document.getElementById('download-btn');
+// Global UI Navigation
+window.navTo = function(viewId) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById(viewId).classList.add('active');
+};
 
-let selectedFiles = [];
-
-// --- Drag & Drop Logic ---
-dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
-dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-dropZone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    dropZone.classList.remove('dragover');
-    handleFileSelect(e.dataTransfer.files);
-});
-fileInput.addEventListener('change', (e) => handleFileSelect(e.target.files));
-
-function handleFileSelect(files) {
-    let totalSize = Array.from(files).reduce((acc, f) => acc + f.size, 0);
-    if (totalSize > 50 * 1024 * 1024) {
-        alert('Total size exceeds 50MB limit.');
-        selectedFiles = [];
-        fileLabel.innerHTML = 'Drag & Drop files here (Max 50MB)';
-        return;
+// --- QR Code Auto-Scan Logic ---
+// If URL has ?pin=1234&otp=5678, skip to receive and verify immediately
+window.onload = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlPin = urlParams.get('pin');
+    const urlOtp = urlParams.get('otp');
+    if(urlPin && urlOtp) {
+        document.getElementById('receiver-pin').value = urlPin;
+        document.getElementById('receiver-otp').value = urlOtp;
+        navTo('view-receive');
+        document.getElementById('verify-btn').click(); // Auto unlock
     }
-    selectedFiles = files;
-    fileLabel.innerHTML = `${files.length} file(s) selected.<br>Total size: ${(totalSize / 1024 / 1024).toFixed(2)} MB`;
+};
+
+// --- Sound Effects ---
+const playSwoosh = () => document.getElementById('sound-upload').play().catch(()=>{});
+const playDing = () => document.getElementById('sound-unlock').play().catch(()=>{});
+
+// --- File Selection & Drag Drop (Send Flow) ---
+let selectedFilesArray = [];
+const dropOverlay = document.getElementById('fullscreen-drop');
+const fileInput = document.getElementById('file-input');
+const fileListContainer = document.getElementById('file-list-container');
+const uploadBtn = document.getElementById('upload-btn');
+
+window.addEventListener('dragenter', (e) => { e.preventDefault(); if(document.getElementById('view-send').classList.contains('active')) dropOverlay.style.display = 'flex'; });
+dropOverlay.addEventListener('dragover', (e) => e.preventDefault());
+dropOverlay.addEventListener('dragleave', (e) => { e.preventDefault(); dropOverlay.style.display = 'none'; });
+dropOverlay.addEventListener('drop', (e) => { e.preventDefault(); dropOverlay.style.display = 'none'; handleNewFiles(e.dataTransfer.files); });
+fileInput.addEventListener('change', (e) => handleNewFiles(e.target.files));
+
+function handleNewFiles(files) {
+    Array.from(files).forEach(file => {
+        if (!selectedFilesArray.some(f => f.name === file.name && f.size === file.size)) selectedFilesArray.push(file);
+    });
+    renderFileList();
 }
 
-// --- Upload Flow ---
+window.removeFile = function(index) {
+    selectedFilesArray.splice(index, 1);
+    renderFileList();
+}
+
+function renderFileList() {
+    fileListContainer.innerHTML = '';
+    let totalSize = 0;
+    selectedFilesArray.forEach((file, index) => {
+        totalSize += file.size;
+        let icon = file.type.includes('image') ? '🖼️' : (file.type.includes('video') ? '🎥' : '📄');
+        fileListContainer.innerHTML += `
+            <div class="file-item">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span>${icon}</span>
+                    <div><div style="font-weight:500; font-size:14px; max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${file.name}</div>
+                    <div style="font-size:12px; color:gray;">${(file.size/1024/1024).toFixed(2)} MB</div></div>
+                </div>
+                <button class="remove-btn" onclick="removeFile(${index})">×</button>
+            </div>
+        `;
+    });
+
+    if (totalSize > 50 * 1024 * 1024) {
+        uploadBtn.style.background = 'var(--danger)';
+        document.getElementById('upload-text').innerText = 'Size Exceeds 50MB';
+        uploadBtn.disabled = true;
+    } else {
+        uploadBtn.style.background = 'var(--primary)';
+        document.getElementById('upload-text').innerText = 'Upload Securely';
+        uploadBtn.disabled = false;
+    }
+}
+
+// --- Upload to Supabase ---
 uploadBtn.addEventListener('click', async () => {
     const pin = document.getElementById('sender-pin').value;
     const maxDownloads = document.getElementById('max-downloads').value || 2;
 
     if (!pin || pin.length !== 4) return alert('Please enter a 4-digit PIN.');
-    if (selectedFiles.length === 0) return alert('Please select a file.');
+    if (selectedFilesArray.length === 0) return alert('Add files first!');
 
-    uploadBtn.innerText = 'Uploading...';
     uploadBtn.disabled = true;
+    document.getElementById('rocket-icon').classList.add('launching'); // Rocket animation
+    document.getElementById('upload-text').innerText = 'Uploading...';
 
     try {
         let filePaths = [];
         let totalSize = 0;
 
-        // Upload to bucket
-        for (let file of selectedFiles) {
+        for (let file of selectedFilesArray) {
             const fileName = `${Date.now()}_${file.name}`;
-            const { data, error } = await supabase.storage.from('quickshares_files').upload(fileName, file);
+            const { error } = await supabase.storage.from('quickshares_files').upload(fileName, file);
             if (error) throw error;
             filePaths.push(fileName);
             totalSize += file.size;
         }
 
-        // Create Database Row
         const { data: shareData, error: dbError } = await supabase
-            .from('shares')
-            .insert([{ 
-                pin: pin, 
-                file_paths: filePaths, 
-                total_size_bytes: totalSize, 
-                max_downloads: maxDownloads 
-            }])
-            .select()
-            .single();
-
+            .from('shares').insert([{ pin: pin, file_paths: filePaths, total_size_bytes: totalSize, max_downloads: maxDownloads }]).select().single();
         if (dbError) throw dbError;
 
-        // Transition UI to Active Session
-        document.getElementById('nav-tabs').style.display = 'none';
-        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-        document.getElementById('view-active').classList.add('active');
-        
+        playSwoosh(); // Play sound
+        document.getElementById('rocket-icon').classList.remove('launching');
+
+        // Setup Active Session UI
         document.getElementById('display-pin').innerText = shareData.pin;
         document.getElementById('display-otp').innerText = shareData.otp;
         document.getElementById('download-max').innerText = shareData.max_downloads || '∞';
+        
+        // Generate Magic QR Code
+        document.getElementById('qrcode').innerHTML = ''; // clear old
+        const magicLink = `${window.location.origin}${window.location.pathname}?pin=${shareData.pin}&otp=${shareData.otp}`;
+        new QRCode(document.getElementById('qrcode'), { text: magicLink, width: 150, height: 150 });
 
-        startTimer(300); // 5 minutes
+        navTo('view-active');
+        startTimer(300); 
         subscribeToRealtime(shareData.id);
 
     } catch (err) {
         alert('Upload failed: ' + err.message);
-        uploadBtn.innerText = 'Upload & Generate OTP';
+        document.getElementById('rocket-icon').classList.remove('launching');
         uploadBtn.disabled = false;
     }
 });
 
-// --- Realtime & Timer Logic ---
+// --- Timer & Realtime ---
 function startTimer(duration) {
-    let timer = duration, minutes, seconds;
+    let timer = duration;
     const display = document.getElementById('timer');
     const interval = setInterval(() => {
-        minutes = parseInt(timer / 60, 10);
-        seconds = parseInt(timer % 60, 10);
-        minutes = minutes < 10 ? "0" + minutes : minutes;
-        seconds = seconds < 10 ? "0" + seconds : seconds;
-        display.textContent = minutes + ":" + seconds;
-        if (--timer < 0) {
-            clearInterval(interval);
-            display.textContent = "EXPIRED";
-            display.style.color = "#64748b";
-        }
+        let m = parseInt(timer / 60, 10); let s = parseInt(timer % 60, 10);
+        m = m < 10 ? "0" + m : m; s = s < 10 ? "0" + s : s;
+        display.textContent = m + ":" + s;
+        if (--timer < 0) { clearInterval(interval); display.textContent = "EXPIRED"; display.style.color = "gray"; }
     }, 1000);
 }
-
 function subscribeToRealtime(shareId) {
     supabase.channel('custom-all-channel')
     .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'shares', filter: `id=eq.${shareId}` }, (payload) => {
-        const row = payload.new;
-        document.getElementById('download-count').innerText = row.download_count;
-        if (row.status === 'expired') {
-            document.getElementById('timer').textContent = "EXPIRED";
-            document.getElementById('timer').style.color = "#64748b";
-        }
-    })
-    .subscribe();
+        document.getElementById('download-count').innerText = payload.new.download_count;
+        if (payload.new.status === 'expired') document.getElementById('timer').textContent = "EXPIRED";
+    }).subscribe();
 }
 
-// --- Download Flow (Hidden URL / Direct File Blob Method) ---
-downloadBtn.addEventListener('click', async () => {
+// --- Receive Flow (Unlock Vault) ---
+let vaultFilesData = []; // Store secure URLs
+
+document.getElementById('verify-btn').addEventListener('click', async () => {
     const pin = document.getElementById('receiver-pin').value;
     const otp = document.getElementById('receiver-otp').value;
     const statusText = document.getElementById('receive-status');
+    const verifyBtn = document.getElementById('verify-btn');
 
-    if (!pin || !otp) return alert('Enter both PIN and OTP');
-    
-    downloadBtn.innerText = 'Verifying...';
-    downloadBtn.disabled = true;
+    if (!pin || !otp) return statusText.innerText = 'Enter both PIN and OTP';
+    verifyBtn.innerText = 'Unlocking...'; verifyBtn.disabled = true;
 
     try {
         const { data, error } = await supabase.rpc('verify_and_download', { p_pin: pin, p_otp: otp });
-        
-        if (error) throw new Error('Database error: ' + error.message);
-        if (!data || data.length === 0) throw new Error('Invalid credentials or files expired.');
+        if (error || !data || data.length === 0) throw new Error('Invalid credentials or session expired.');
 
         const filePaths = data[0].files;
-        statusText.innerText = 'Credentials verified. Downloading files securely...';
-        statusText.style.color = '#10b981'; // Green
+        vaultFilesData = [];
 
-        // Fetch the file in the background and trigger forced download
         for (let path of filePaths) {
-            const { data: urlData, error: urlError } = await supabase.storage.from('quickshares_files').createSignedUrl(path, 60);
-            
-            if (urlError) throw new Error('Storage error: ' + urlError.message);
-
+            const { data: urlData } = await supabase.storage.from('quickshares_files').createSignedUrl(path, 60);
             if (urlData) {
-                // Fetch the actual file blob securely
-                const response = await fetch(urlData.signedUrl);
-                if (!response.ok) throw new Error('Network response was not ok');
-                const blob = await response.blob();
+                const originalName = path.split('_').slice(1).join('_');
+                const ext = originalName.split('.').pop().toLowerCase();
+                let type = 'pdf';
+                if(['png','jpg','jpeg','gif','webp'].includes(ext)) type = 'image';
+                if(['mp4','webm','mov'].includes(ext)) type = 'video';
                 
-                // Create a temporary object URL that hides the real backend path
-                const localUrl = window.URL.createObjectURL(blob);
-                
-                // Create an invisible link to trigger the download prompt
-                const a = document.createElement('a');
-                a.href = localUrl;
-                
-                // Extract original filename (removing your generated timestamp)
-                a.download = path.split('_').slice(1).join('_'); 
-                
-                document.body.appendChild(a);
-                a.click();
-                
-                // Clean up the browser memory immediately after starting download
-                a.remove();
-                window.URL.revokeObjectURL(localUrl);
+                vaultFilesData.push({ url: urlData.signedUrl, name: originalName, type: type });
             }
         }
         
-        statusText.innerText = 'Download complete!';
-        downloadBtn.innerText = 'Download Files';
-        downloadBtn.disabled = false;
+        playDing(); // Play success sound
+        renderVault();
+        navTo('view-vault');
         
     } catch (err) {
         statusText.innerText = err.message;
-        statusText.style.color = '#ef4444'; // Red
-        downloadBtn.innerText = 'Download Files';
-        downloadBtn.disabled = false;
+        verifyBtn.innerText = 'Unlock Vault 🔓'; verifyBtn.disabled = false;
     }
 });
+
+function renderVault() {
+    const grid = document.getElementById('vault-grid');
+    grid.innerHTML = '';
+    vaultFilesData.forEach((file, index) => {
+        let icon = file.type === 'image' ? '🖼️' : (file.type === 'video' ? '🎥' : '📄');
+        grid.innerHTML += `
+            <div class="vault-item" onclick="openPreview(${index})">
+                <div style="font-size:40px; margin-bottom:10px;">${icon}</div>
+                <div style="font-size:13px; font-weight:bold; overflow:hidden; text-overflow:ellipsis;">${file.name}</div>
+            </div>
+        `;
+    });
+}
+
+// --- Preview & Print Engine ---
+const modal = document.getElementById('preview-modal');
+const previewContent = document.getElementById('preview-content');
+const previewActions = document.getElementById('preview-actions');
+
+window.openPreview = function(index) {
+    const file = vaultFilesData[index];
+    document.getElementById('preview-title').innerText = file.name;
+    modal.style.display = 'flex';
+    
+    // Create silent local blob for download to hide Supabase URL
+    let downloadAction = `downloadSilent('${file.url}', '${file.name}')`;
+    let printAction = `printFile('${file.url}', '${file.type}')`;
+
+    if(file.type === 'image') {
+        previewContent.innerHTML = `<img src="${file.url}">`;
+        previewActions.innerHTML = `<button onclick="${printAction}">🖨️ Print</button> <button class="primary" onclick="${downloadAction}">⬇️ Download</button>`;
+    } else if(file.type === 'video') {
+        previewContent.innerHTML = `<video controls autoplay><source src="${file.url}"></video>`;
+        previewActions.innerHTML = `<button class="primary" onclick="${downloadAction}">⬇️ Download</button>`;
+    } else {
+        previewContent.innerHTML = `<iframe src="${file.url}" style="width:100%; height:80vh; background:white;"></iframe>`;
+        previewActions.innerHTML = `<button onclick="${printAction}">🖨️ Print</button> <button class="primary" onclick="${downloadAction}">⬇️ Download</button>`;
+    }
+};
+
+window.closePreview = function() {
+    modal.style.display = 'none';
+    previewContent.innerHTML = ''; // Stop video audio
+};
+
+// Hidden Download (Blob)
+window.downloadSilent = async function(url, filename) {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    const localUrl = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = localUrl; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    window.URL.revokeObjectURL(localUrl);
+};
+
+// Hidden Print logic
+window.printFile = function(url, type) {
+    const iframe = document.getElementById('print-frame');
+    if (type === 'image') {
+        iframe.srcdoc = `<html><head></head><body style="margin:0;"><img src="${url}" style="max-width:100%;" onload="window.print();"></body></html>`;
+    } else {
+        iframe.src = url;
+        iframe.onload = () => iframe.contentWindow.print();
+    }
+};
