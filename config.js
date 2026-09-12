@@ -1,3 +1,3 @@
 // config.js
-export const supabaseUrl = 'YOUR_SUPABASE_PROJECT_URL';
-export const supabaseKey = 'YOUR_SUPABASE_ANON_KEY';
+export const supabaseUrl = 'https://opqfxehunrigdzlvsvbz.supabase.co';
+export const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wcWZ4ZWh1bnJpZ2R6bHZzdmJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkxODIyMjIsImV4cCI6MjEwNDc1ODIyMn0.OoAvCInz_kqjrw7P_v8HMkfNBw-CF1R2PtTudOwHt9s';
