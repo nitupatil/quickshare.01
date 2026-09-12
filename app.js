@@ -4,31 +4,48 @@ import { supabaseUrl, supabaseKey } from './config.js';
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Global UI Navigation
-window.navTo = function(viewId) {
+// --- History API (Fixes Mobile Back Button) ---
+if (!history.state) { history.replaceState({ view: 'view-landing' }, '', '/'); }
+
+window.navTo = function(viewId, pushHistory = true) {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.getElementById(viewId).classList.add('active');
-};
-
-// --- QR Code Auto-Scan Logic ---
-// If URL has ?pin=1234&otp=5678, skip to receive and verify immediately
-window.onload = () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlPin = urlParams.get('pin');
-    const urlOtp = urlParams.get('otp');
-    if(urlPin && urlOtp) {
-        document.getElementById('receiver-pin').value = urlPin;
-        document.getElementById('receiver-otp').value = urlOtp;
-        navTo('view-receive');
-        document.getElementById('verify-btn').click(); // Auto unlock
+    
+    if (pushHistory) {
+        let url = viewId === 'view-landing' ? '/' : '#' + viewId;
+        history.pushState({ view: viewId }, '', url);
     }
 };
 
-// --- Sound Effects ---
+window.addEventListener('popstate', (e) => {
+    // If preview modal is open, phone back button closes modal first
+    if (document.getElementById('preview-modal').style.display === 'flex') {
+        document.getElementById('preview-modal').style.display = 'none';
+        document.getElementById('preview-content').innerHTML = ''; 
+    } 
+    // Otherwise go to the previous screen
+    else if (e.state && e.state.view) {
+        navTo(e.state.view, false);
+    } else {
+        navTo('view-landing', false);
+    }
+});
+
+// --- QR Code Auto-Scan Logic ---
+window.onload = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if(urlParams.get('pin') && urlParams.get('otp')) {
+        document.getElementById('receiver-pin').value = urlParams.get('pin');
+        document.getElementById('receiver-otp').value = urlParams.get('otp');
+        navTo('view-receive');
+        document.getElementById('verify-btn').click();
+    }
+};
+
 const playSwoosh = () => document.getElementById('sound-upload').play().catch(()=>{});
 const playDing = () => document.getElementById('sound-unlock').play().catch(()=>{});
 
-// --- File Selection & Drag Drop (Send Flow) ---
+// --- File Drag & Drop (Send Flow) ---
 let selectedFilesArray = [];
 const dropOverlay = document.getElementById('fullscreen-drop');
 const fileInput = document.getElementById('file-input');
@@ -91,7 +108,7 @@ uploadBtn.addEventListener('click', async () => {
     if (selectedFilesArray.length === 0) return alert('Add files first!');
 
     uploadBtn.disabled = true;
-    document.getElementById('rocket-icon').classList.add('launching'); // Rocket animation
+    document.getElementById('rocket-icon').classList.add('launching');
     document.getElementById('upload-text').innerText = 'Uploading...';
 
     try {
@@ -110,18 +127,16 @@ uploadBtn.addEventListener('click', async () => {
             .from('shares').insert([{ pin: pin, file_paths: filePaths, total_size_bytes: totalSize, max_downloads: maxDownloads }]).select().single();
         if (dbError) throw dbError;
 
-        playSwoosh(); // Play sound
+        playSwoosh();
         document.getElementById('rocket-icon').classList.remove('launching');
 
-        // Setup Active Session UI
         document.getElementById('display-pin').innerText = shareData.pin;
         document.getElementById('display-otp').innerText = shareData.otp;
         document.getElementById('download-max').innerText = shareData.max_downloads || '∞';
         
-        // Generate Magic QR Code
-        document.getElementById('qrcode').innerHTML = ''; // clear old
+        document.getElementById('qrcode').innerHTML = '';
         const magicLink = `${window.location.origin}${window.location.pathname}?pin=${shareData.pin}&otp=${shareData.otp}`;
-        new QRCode(document.getElementById('qrcode'), { text: magicLink, width: 150, height: 150 });
+        new QRCode(document.getElementById('qrcode'), { text: magicLink, width: 130, height: 130 });
 
         navTo('view-active');
         startTimer(300); 
@@ -154,7 +169,7 @@ function subscribeToRealtime(shareId) {
 }
 
 // --- Receive Flow (Unlock Vault) ---
-let vaultFilesData = []; // Store secure URLs
+let vaultFilesData = []; 
 
 document.getElementById('verify-btn').addEventListener('click', async () => {
     const pin = document.getElementById('receiver-pin').value;
@@ -169,10 +184,8 @@ document.getElementById('verify-btn').addEventListener('click', async () => {
         const { data, error } = await supabase.rpc('verify_and_download', { p_pin: pin, p_otp: otp });
         if (error || !data || data.length === 0) throw new Error('Invalid credentials or session expired.');
 
-        const filePaths = data[0].files;
         vaultFilesData = [];
-
-        for (let path of filePaths) {
+        for (let path of data[0].files) {
             const { data: urlData } = await supabase.storage.from('quickshares_files').createSignedUrl(path, 60);
             if (urlData) {
                 const originalName = path.split('_').slice(1).join('_');
@@ -180,14 +193,14 @@ document.getElementById('verify-btn').addEventListener('click', async () => {
                 let type = 'pdf';
                 if(['png','jpg','jpeg','gif','webp'].includes(ext)) type = 'image';
                 if(['mp4','webm','mov'].includes(ext)) type = 'video';
-                
                 vaultFilesData.push({ url: urlData.signedUrl, name: originalName, type: type });
             }
         }
         
-        playDing(); // Play success sound
+        playDing();
         renderVault();
         navTo('view-vault');
+        verifyBtn.innerText = 'Unlock Vault 🔓'; verifyBtn.disabled = false;
         
     } catch (err) {
         statusText.innerText = err.message;
@@ -210,37 +223,52 @@ function renderVault() {
 }
 
 // --- Preview & Print Engine ---
-const modal = document.getElementById('preview-modal');
-const previewContent = document.getElementById('preview-content');
-const previewActions = document.getElementById('preview-actions');
-
 window.openPreview = function(index) {
+    // Push dummy state so phone back button triggers a 'popstate' and closes this modal
+    history.pushState({ modal: true }, '', '#preview'); 
+    
     const file = vaultFilesData[index];
     document.getElementById('preview-title').innerText = file.name;
+    const modal = document.getElementById('preview-modal');
+    const content = document.getElementById('preview-content');
+    const actions = document.getElementById('preview-actions');
+    
     modal.style.display = 'flex';
     
-    // Create silent local blob for download to hide Supabase URL
     let downloadAction = `downloadSilent('${file.url}', '${file.name}')`;
     let printAction = `printFile('${file.url}', '${file.type}')`;
 
     if(file.type === 'image') {
-        previewContent.innerHTML = `<img src="${file.url}">`;
-        previewActions.innerHTML = `<button onclick="${printAction}">🖨️ Print</button> <button class="primary" onclick="${downloadAction}">⬇️ Download</button>`;
+        content.innerHTML = `<img src="${file.url}">`;
+        actions.innerHTML = `<button onclick="${printAction}">🖨️ Print</button> <button class="primary" onclick="${downloadAction}">⬇️ Download</button>`;
     } else if(file.type === 'video') {
-        previewContent.innerHTML = `<video controls autoplay><source src="${file.url}"></video>`;
-        previewActions.innerHTML = `<button class="primary" onclick="${downloadAction}">⬇️ Download</button>`;
+        content.innerHTML = `<video controls autoplay playsinline><source src="${file.url}"></video>`;
+        actions.innerHTML = `<button class="primary" onclick="${downloadAction}">⬇️ Download</button>`;
     } else {
-        previewContent.innerHTML = `<iframe src="${file.url}" style="width:100%; height:80vh; background:white;"></iframe>`;
-        previewActions.innerHTML = `<button onclick="${printAction}">🖨️ Print</button> <button class="primary" onclick="${downloadAction}">⬇️ Download</button>`;
+        content.innerHTML = `<iframe src="${file.url}" style="width:100%; height:100%; border:none; background:white; border-radius:8px;"></iframe>`;
+        actions.innerHTML = `<button onclick="${printAction}">🖨️ Print</button> <button class="primary" onclick="${downloadAction}">⬇️ Download</button>`;
     }
 };
 
 window.closePreview = function() {
-    modal.style.display = 'none';
-    previewContent.innerHTML = ''; // Stop video audio
+    if(history.state && history.state.modal) {
+        history.back(); // Triggers the popstate event to clean up properly
+    } else {
+        document.getElementById('preview-modal').style.display = 'none';
+        document.getElementById('preview-content').innerHTML = '';
+    }
 };
 
-// Hidden Download (Blob)
+window.downloadAllFiles = async function() {
+    const btn = document.querySelector('#view-vault .action-btn');
+    btn.innerText = 'Downloading...';
+    for(let file of vaultFilesData) {
+        await downloadSilent(file.url, file.name);
+        await new Promise(r => setTimeout(r, 500)); // slight delay prevents browsers from blocking multiple downloads
+    }
+    btn.innerText = '⬇️ Download All Files';
+};
+
 window.downloadSilent = async function(url, filename) {
     const response = await fetch(url);
     const blob = await response.blob();
@@ -251,11 +279,10 @@ window.downloadSilent = async function(url, filename) {
     window.URL.revokeObjectURL(localUrl);
 };
 
-// Hidden Print logic
 window.printFile = function(url, type) {
     const iframe = document.getElementById('print-frame');
     if (type === 'image') {
-        iframe.srcdoc = `<html><head></head><body style="margin:0;"><img src="${url}" style="max-width:100%;" onload="window.print();"></body></html>`;
+        iframe.srcdoc = `<html><head></head><body style="margin:0; text-align:center;"><img src="${url}" style="max-width:100%; max-height:100vh;" onload="window.print();"></body></html>`;
     } else {
         iframe.src = url;
         iframe.onload = () => iframe.contentWindow.print();
