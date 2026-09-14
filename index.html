@@ -3,11 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-  <title>Quickshares.online | send files like magic</title>
+  
+  <!-- SEO Optimization -->
+  <title>Quickshares.online | Fast & Secure Quick File Share Online</title>
+  <meta name="description" content="Quickshares.online is a free, fast, and magical temporary file transfer service. Share files instantly across devices using a simple PIN and OTP.">
+  <meta name="keywords" content="quick file share online, file transfer, send files, share files, secure file sharing, fast file drop">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/jpeg" href="https://i.ibb.co/Rpb7JdYS/gemini-svg-1.jpg">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <!-- INSTANT CHECK: If QR code scanned, bypass animation immediately before first paint -->
+  <script>
+    (function() {
+      var p = new URLSearchParams(window.location.search);
+      if (p.get('pin') && p.get('otp')) {
+        document.documentElement.classList.add('qr-scanned-mode');
+      }
+    })();
+  </script>
+
   <style>
     /* ---------- RESET & VARIABLES ---------- */
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -16,6 +35,10 @@
 
     /* ---------- PREFERS REDUCED MOTION ---------- */
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; } .floating-doodle { display: none; } .moving-border-svg rect { animation: none; } }
+
+    /* IF QR SCANNED: Hide intro completely & make app container visible instantly */
+    .qr-scanned-mode #intro-animation { display: none !important; }
+    .qr-scanned-mode .app-container { opacity: 1 !important; transform: none !important; }
 
     /* ---------- DOODLE BACKGROUND ---------- */
     .doodle-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
@@ -62,7 +85,7 @@
     .logo-text { background: linear-gradient(135deg, var(--primary) 0%, var(--violet) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
     .logo-dot { color: var(--coral); font-size: 2rem; line-height: 0; margin-left: 2px; }
 
-    .glass-panel { background: var(--card-bg); border: 1.5px solid var(--card-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); width: 100%; max-width: 540px; padding: 32px 28px; position: relative; overflow: hidden; transition: box-shadow var(--transition-smooth), border-color var(--transition-smooth); }
+    .glass-panel { background: var(--card-bg); border: 1.5px solid var(--card-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); width: 100%; max-width: 580px; padding: 32px 28px; position: relative; overflow: hidden; transition: box-shadow var(--transition-smooth), border-color var(--transition-smooth); }
     .glass-panel::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, var(--primary) 0%, var(--violet) 50%, var(--coral) 100%); border-radius: var(--radius-lg) var(--radius-lg) 0 0; opacity: 0.7; }
     .view { display: none; opacity: 0; transition: opacity 0.35s; }
     .view.active { display: block; opacity: 1; animation: viewIn 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.1) forwards; }
@@ -72,8 +95,9 @@
     .hero-section { text-align: center; margin-bottom: 24px; }
     .hero-title { font-size: 2.3rem; font-weight: 900; line-height: 1.1; letter-spacing: -0.04em; color: var(--ink); margin-bottom: 8px; }
     .hero-title .highlight { background: linear-gradient(135deg, var(--primary), var(--violet)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .hero-sub { font-size: 0.95rem; font-weight: 600; color: var(--muted); line-height: 1.5; max-width: 380px; margin: 0 auto; }
+    .hero-sub { font-size: 0.95rem; font-weight: 600; color: var(--muted); line-height: 1.5; max-width: 420px; margin: 0 auto; }
 
+    /* Updated Steps Bar */
     .quick-steps-bar { display: flex; justify-content: center; gap: 8px; margin: 18px 0 6px; font-size: 0.78rem; font-weight: 700; color: var(--ink-soft); flex-wrap: wrap; }
     .step-badge { background: var(--bg-soft); padding: 5px 12px; border-radius: 100px; border: 1px solid var(--card-border); }
 
@@ -165,6 +189,12 @@
 
     .fullscreen-drop { position: fixed; inset: 0; background: rgba(253, 249, 240, 0.92); backdrop-filter: blur(16px); z-index: 999; display: none; justify-content: center; align-items: center; border: 6px dashed var(--primary); }
     .fullscreen-drop.active { display: flex; }
+
+    /* ---------- SITE FOOTER ---------- */
+    .site-footer { margin-top: 32px; text-align: center; display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; z-index: 2; position: relative; }
+    .site-footer a { color: var(--muted); text-decoration: none; font-size: 0.85rem; font-weight: 600; transition: color var(--transition-fast); }
+    .site-footer a:hover { color: var(--primary); }
+
     @media (max-width: 480px) { .app-container { padding: 16px 14px 32px; justify-content: flex-start; padding-top: 28px; } .glass-panel { padding: 24px 18px; border-radius: 24px; } .hero-title { font-size: 1.85rem; } }
   </style>
 </head>
@@ -212,13 +242,13 @@
       <div id="view-landing" class="view active" role="main">
         <div class="hero-section">
           <h1 class="hero-title">Send files.<br><span class="highlight">Like magic.</span></h1>
-          <p class="hero-sub">Just upload files, set a temporary 4-digit PIN, and download them on any other device instantly.</p>
+          <p class="hero-sub">Upload files, set a temporary PIN, and download them on any other device instantly.</p>
           <div class="quick-steps-bar">
             <span class="step-badge">1. Pick files</span>
             <span>➔</span>
             <span class="step-badge">2. Set PIN</span>
             <span>➔</span>
-            <span class="step-badge">3. Scan / Download</span>
+            <span class="step-badge">3. Open Quickshares to Download</span>
           </div>
         </div>
 
@@ -328,6 +358,14 @@
       </div>
 
     </div>
+
+    <!-- FOOTER LINKS -->
+    <footer class="site-footer">
+      <a href="/how-to-use">How it Works</a>
+      <a href="/privacy">Privacy Policy</a>
+      <a href="/contact">Contact</a>
+    </footer>
+
   </div>
 
   <!-- PREVIEW MODAL -->
@@ -346,27 +384,17 @@
 
   <script>
     (function() {
-      // 1. FORCE THE INTRO ANIMATION TO HIDE IF A QR CODE IS SCANNED
+      // NORMAL INTRO SCRIPT: Skip only if NOT in QR-scanned mode
       var intro = document.getElementById('intro-animation');
       var app = document.getElementById('app-container');
-      var p = new URLSearchParams(window.location.search);
-      var isQR = p.get('pin') && p.get('otp');
+      var isQR = document.documentElement.classList.contains('qr-scanned-mode');
 
-      if (intro && app) {
-        if (isQR) {
-          // Bypass intro instantly
-          intro.style.display = 'none';
+      if (intro && app && !isQR) {
+        setTimeout(function() {
+          intro.classList.add('intro-fade-out');
           app.classList.add('visible');
-          app.style.opacity = '1';
-          app.style.transform = 'translateY(0)';
-        } else {
-          // Play normal 3-second magic intro
-          setTimeout(function() {
-            intro.classList.add('intro-fade-out');
-            app.classList.add('visible');
-            setTimeout(function() { intro.style.display = 'none'; }, 650);
-          }, 2600);
-        }
+          setTimeout(function() { intro.style.display = 'none'; }, 650);
+        }, 2600);
       }
 
       window.navTo = function(viewId) {
