@@ -85,7 +85,6 @@
     .logo-text { background: linear-gradient(135deg, var(--primary) 0%, var(--violet) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
     .logo-dot { color: var(--coral); font-size: 2rem; line-height: 0; margin-left: 2px; }
 
-    /* Modified to apply to sub-pages individually */
     .glass-panel { background: var(--card-bg); border: 1.5px solid var(--card-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); width: 100%; max-width: 580px; padding: 32px 28px; position: relative; overflow: hidden; transition: box-shadow var(--transition-smooth), border-color var(--transition-smooth); margin: 0 auto; }
     .glass-panel::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, var(--primary) 0%, var(--violet) 50%, var(--coral) 100%); border-radius: var(--radius-lg) var(--radius-lg) 0 0; opacity: 0.7; }
     
@@ -116,7 +115,6 @@
     .split-landing { display: flex; flex-direction: column; gap: 12px; }
     @media (min-width: 480px) { .split-landing { flex-direction: row; gap: 14px; } }
     
-    /* The buttons are now the standalone glass containers */
     .split-btn { position: relative; flex: 1; background: var(--card-bg); border: 2px solid var(--card-border); border-radius: var(--radius-md); cursor: pointer; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 24px 16px; font-size: 1.1rem; font-weight: 700; color: var(--ink); transition: all var(--transition-smooth); box-shadow: var(--shadow-card); overflow: hidden; text-align: center; }
     .split-btn .btn-doodle { width: 48px; height: 48px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; background: var(--primary-soft); border-radius: 14px; font-size: 1.5rem; transition: transform var(--transition-spring); }
     .split-btn[data-action="send"] .btn-doodle { background: var(--primary-soft); color: var(--primary); }
@@ -241,7 +239,7 @@
       <span class="logo-dot" aria-hidden="true">.</span>
     </div>
 
-    <!-- LANDING VIEW (Sits directly on the animated background without a container wrapper) -->
+    <!-- LANDING VIEW -->
     <div id="view-landing" class="view active landing-wrapper" role="main">
       <div class="hero-section">
         <h1 class="hero-title">Send files.<br><span class="highlight">Like magic.</span></h1>
@@ -361,8 +359,9 @@
 
     <!-- FOOTER LINKS -->
     <footer class="site-footer">
-      <a href="/how-to-use">How it Works</a>
+      <a href="/about">About Us</a>
       <a href="/privacy">Privacy Policy</a>
+      <a href="/terms">Terms of Service</a>
       <a href="/contact">Contact</a>
     </footer>
 
