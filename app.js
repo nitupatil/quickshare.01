@@ -37,24 +37,32 @@ window.addEventListener('popstate', (e) => {
 });
 
 // --- QR CODE AUTO-SCAN LOGIC ---
-window.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const pin = urlParams.get('pin');
-    const otp = urlParams.get('otp');
+const urlParams = new URLSearchParams(window.location.search);
+const pin = urlParams.get('pin');
+const otp = urlParams.get('otp');
 
-    if (pin && otp) {
-        document.getElementById('receiver-pin').value = pin;
-        document.getElementById('receiver-otp').value = otp;
-        window.navTo('view-receive');
-        
+if (pin && otp) {
+    // 1. Instantly hide the 3-second intro animation since they are scanning a QR code
+    const intro = document.getElementById('intro-animation');
+    const appContainer = document.getElementById('app-container');
+    if (intro) intro.style.display = 'none';
+    if (appContainer) appContainer.classList.add('visible');
+
+    // 2. Auto-fill the credentials
+    document.getElementById('receiver-pin').value = pin;
+    document.getElementById('receiver-otp').value = otp;
+    
+    // 3. Navigate straight to the receive screen
+    window.navTo('view-receive');
+    
+    // 4. Automatically click the unlock button to fetch the files
+    setTimeout(() => {
         const verifyBtn = document.getElementById('verify-btn');
         if (verifyBtn) {
-            setTimeout(() => {
-                verifyBtn.click();
-            }, 400); // Slight delay for UI to settle before verifying
+            verifyBtn.click();
         }
-    }
-});
+    }, 100); // Tiny delay ensures the UI has switched before clicking
+}
 
 // --- FILE SELECTION & DRAG DROP ---
 let selectedFilesArray = [];
@@ -62,8 +70,6 @@ const fileInput = document.getElementById('file-input');
 const fileListContainer = document.getElementById('file-list-container');
 const uploadBtn = document.getElementById('upload-btn');
 
-// The click & drag logic is partially handled in your HTML fallback, 
-// but we handle the actual file data processing here.
 fileInput.addEventListener('change', (e) => handleNewFiles(e.target.files));
 
 function handleNewFiles(files) {
