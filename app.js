@@ -5,9 +5,18 @@ import { supabaseUrl, supabaseKey } from './config.js';
 // Initialize Supabase
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+// --- DETECT QR PARAMETERS BEFORE ANY HISTORY MANIPULATION ---
+const urlParams = new URLSearchParams(window.location.search);
+const qrPin = urlParams.get('pin');
+const qrOtp = urlParams.get('otp');
+const isQRScanned = Boolean(qrPin && qrOtp);
+
 // --- HISTORY API & NAVIGATION ---
 if (!history.state) {
-    history.replaceState({ view: 'view-landing' }, '', window.location.pathname);
+    // CRITICAL FIX: Do NOT erase the query string when QR parameters exist!
+    const targetUrl = isQRScanned ? window.location.href : window.location.pathname;
+    const initialView = isQRScanned ? 'view-receive' : 'view-landing';
+    history.replaceState({ view: initialView }, '', targetUrl);
 }
 
 window.navTo = function(viewId, pushHistory = true) {
@@ -16,7 +25,10 @@ window.navTo = function(viewId, pushHistory = true) {
     if (target) target.classList.add('active');
     
     if (pushHistory) {
+        // Retain the query string so refreshing never breaks QR mode
+        const search = window.location.search;
         let url = viewId === 'view-landing' ? window.location.pathname : '#' + viewId;
+        if (isQRScanned) url = window.location.pathname + search + '#' + viewId;
         history.pushState({ view: viewId }, '', url);
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -26,8 +38,7 @@ window.addEventListener('popstate', (e) => {
     const modal = document.getElementById('preview-modal');
     if (modal && modal.classList.contains('active')) {
         window.closePreview(false);
-    } 
-    else if (e.state && e.state.view) {
+    } else if (e.state && e.state.view) {
         window.navTo(e.state.view, false);
     } else {
         window.navTo('view-landing', false);
@@ -54,7 +65,7 @@ function handleNewFiles(files) {
 window.removeFile = function(index) {
     selectedFilesArray.splice(index, 1);
     renderFileList();
-}
+};
 
 function renderFileList() {
     fileListContainer.innerHTML = '';
@@ -101,7 +112,7 @@ uploadBtn.addEventListener('click', async () => {
     document.getElementById('upload-text').innerText = 'PACKING...';
     
     const transferAnim = document.getElementById('transfer-animation');
-    if(transferAnim) transferAnim.classList.add('active');
+    if (transferAnim) transferAnim.classList.add('active');
 
     try {
         let filePaths = [];
@@ -127,13 +138,13 @@ uploadBtn.addEventListener('click', async () => {
         document.getElementById('upload-text').innerText = 'SENT ✦';
         
         setTimeout(() => {
-            if(transferAnim) transferAnim.classList.remove('active');
+            if (transferAnim) transferAnim.classList.remove('active');
             
             document.getElementById('display-pin').innerText = shareData.pin;
             document.getElementById('display-otp').innerText = shareData.otp;
             document.getElementById('download-max').innerText = shareData.max_downloads || '∞';
             
-            // Clean URL generation for the QR Code
+            // Clean QR Code URL generation
             document.getElementById('qrcode').innerHTML = '';
             const baseUrl = window.location.origin + window.location.pathname;
             const magicLink = `${baseUrl}?pin=${shareData.pin}&otp=${shareData.otp}`;
@@ -150,11 +161,11 @@ uploadBtn.addEventListener('click', async () => {
             window.navTo('view-active');
             startTimer(300); 
             subscribeToRealtime(shareData.id);
-        }, 600);
+        }, 500);
 
     } catch (err) {
         alert('Upload failed: ' + err.message);
-        if(transferAnim) transferAnim.classList.remove('active');
+        if (transferAnim) transferAnim.classList.remove('active');
         uploadBtn.disabled = false;
         document.getElementById('upload-text').innerText = 'SEND';
     }
@@ -190,23 +201,26 @@ function subscribeToRealtime(shareId) {
     }).subscribe();
 }
 
-// --- RECEIVE FLOW (Unlock Vault) ---
+// --- CENTRAL VERIFICATION & UNLOCK PIPELINE ---
 let vaultFilesData = []; 
-const verifyBtn = document.getElementById('verify-btn');
 
-verifyBtn.addEventListener('click', async () => {
-    const pin = document.getElementById('receiver-pin').value;
-    const otp = document.getElementById('receiver-otp').value;
+async function processVerification(pin, otp) {
     const statusText = document.getElementById('receive-status');
+    const verifyBtn = document.getElementById('verify-btn');
 
     if (!pin || !otp) {
-        statusText.innerText = 'Enter both PIN and OTP';
+        if (statusText) statusText.innerText = 'Enter both PIN and OTP';
         return;
     }
     
-    verifyBtn.innerHTML = '<span aria-hidden="true">⏳</span> unlocking...'; 
-    verifyBtn.disabled = true;
-    statusText.innerText = '';
+    if (verifyBtn) {
+        verifyBtn.innerHTML = '<span aria-hidden="true">⏳</span> unlocking...'; 
+        verifyBtn.disabled = true;
+    }
+    if (statusText) {
+        statusText.style.color = 'var(--primary)';
+        statusText.innerText = '⚡ Connecting to vault...';
+    }
 
     try {
         const { data, error } = await supabase.rpc('verify_and_download', { p_pin: pin, p_otp: otp });
@@ -222,8 +236,8 @@ verifyBtn.addEventListener('click', async () => {
                 const ext = originalName.split('.').pop().toLowerCase();
                 
                 let type = 'pdf';
-                if(['png','jpg','jpeg','gif','webp'].includes(ext)) type = 'image';
-                if(['mp4','webm','mov'].includes(ext)) type = 'video';
+                if (['png','jpg','jpeg','gif','webp'].includes(ext)) type = 'image';
+                if (['mp4','webm','mov'].includes(ext)) type = 'video';
                 
                 vaultFilesData.push({ 
                     url: urlData.signedUrl, 
@@ -237,14 +251,29 @@ verifyBtn.addEventListener('click', async () => {
         renderVault();
         window.navTo('view-vault');
         
-        verifyBtn.innerHTML = '<span aria-hidden="true">🔓</span> unlock vault'; 
-        verifyBtn.disabled = false;
+        if (verifyBtn) {
+            verifyBtn.innerHTML = '<span aria-hidden="true">🔓</span> unlock vault'; 
+            verifyBtn.disabled = false;
+        }
+        if (statusText) statusText.innerText = '';
         
     } catch (err) {
-        statusText.innerText = err.message;
-        verifyBtn.innerHTML = '<span aria-hidden="true">🔓</span> unlock vault'; 
-        verifyBtn.disabled = false;
+        if (statusText) {
+            statusText.style.color = 'var(--coral)';
+            statusText.innerText = err.message;
+        }
+        if (verifyBtn) {
+            verifyBtn.innerHTML = '<span aria-hidden="true">🔓</span> unlock vault'; 
+            verifyBtn.disabled = false;
+        }
     }
+}
+
+// Manual Receive Button Click
+document.getElementById('verify-btn').addEventListener('click', () => {
+    const pin = document.getElementById('receiver-pin').value;
+    const otp = document.getElementById('receiver-otp').value;
+    processVerification(pin, otp);
 });
 
 function renderVault() {
@@ -255,9 +284,9 @@ function renderVault() {
         let icon = file.type === 'image' ? '🖼️' : (file.type === 'video' ? '🎥' : '📄');
         grid.innerHTML += `
             <div class="vault-item" onclick="openPreview(${index})" role="button" tabindex="0">
-                <div class="vault-icon" aria-hidden="true">${icon}</div>
-                <div class="vault-name">${file.name}</div>
-                <div class="vault-size">Ready</div>
+                <div style="font-size:1.8rem;">${icon}</div>
+                <div style="font-size:0.8rem; font-weight:700; word-break:break-word;">${file.name}</div>
+                <div style="font-size:0.7rem; color:var(--muted); font-weight:500;">Ready</div>
             </div>
         `;
     });
@@ -278,13 +307,13 @@ window.openPreview = function(index) {
     let downloadAction = `downloadSilent('${file.url}', '${file.name}')`;
     let printAction = `printFile('${file.url}', '${file.type}')`;
 
-    if(file.type === 'image') {
+    if (file.type === 'image') {
         content.innerHTML = `<img src="${file.url}" alt="${file.name}">`;
         actions.innerHTML = `
             <button onclick="${printAction}">🖨️ Print</button> 
             <button class="primary" onclick="${downloadAction}">⬇️ Download</button>
         `;
-    } else if(file.type === 'video') {
+    } else if (file.type === 'video') {
         content.innerHTML = `<video controls autoplay playsinline><source src="${file.url}"></video>`;
         actions.innerHTML = `
             <button class="primary" onclick="${downloadAction}">⬇️ Download</button>
@@ -299,16 +328,16 @@ window.openPreview = function(index) {
 };
 
 window.closePreview = function(goBack = true) {
-    if(goBack && history.state && history.state.modal) { 
+    if (goBack && history.state && history.state.modal) { 
         history.back();
     } else { 
         const modal = document.getElementById('preview-modal');
-        if(modal) modal.classList.remove('active'); 
+        if (modal) modal.classList.remove('active'); 
         document.getElementById('preview-content').innerHTML = ''; 
     }
 };
 
-// --- SECURE DOWNLOAD LOGIC ---
+// --- SILENT BLOB DOWNLOAD (HIDES SUPABASE URL) ---
 window.downloadAllFiles = async function() {
     const btn = document.getElementById('download-all-btn');
     const originalText = document.getElementById('dl-text').innerText;
@@ -317,7 +346,7 @@ window.downloadAllFiles = async function() {
     document.getElementById('dl-text').innerText = 'FETCHING FILES...';
     btn.disabled = true;
 
-    for(let file of vaultFilesData) {
+    for (let file of vaultFilesData) {
         await window.downloadSilent(file.url, file.name);
         await new Promise(r => setTimeout(r, 600)); 
     }
@@ -332,7 +361,7 @@ window.downloadAllFiles = async function() {
 window.downloadSilent = async function(url, filename) {
     try {
         const response = await fetch(url);
-        if (!response.ok) throw new Error('Network response was not ok');
+        if (!response.ok) throw new Error('Network error');
         const blob = await response.blob();
         
         const localUrl = window.URL.createObjectURL(blob);
@@ -363,42 +392,16 @@ window.printFile = function(url, type) {
 };
 
 // =========================================================================
-// --- OVERRIDE: THE BULLETPROOF QR CODE AUTO-SCAN LOGIC ---
-// Placing this at the very bottom ensures all DOM elements and listeners 
-// (especially the 'verify-btn' click listener) are fully registered before running.
+// --- AUTOMATIC DIRECT EXECUTION UPON SCANNING QR ---
 // =========================================================================
-function executeQROverride() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const pin = urlParams.get('pin');
-    const otp = urlParams.get('otp');
-
-    if (pin && otp) {
-        // 1. Force the Intro UI to hide immediately
-        const intro = document.getElementById('intro-animation');
-        const appContainer = document.getElementById('app-container');
-        if (intro) {
-            intro.style.display = 'none';
-            intro.style.opacity = '0';
-        }
-        if (appContainer) {
-            appContainer.classList.add('visible');
-            appContainer.style.opacity = '1';
-        }
-
-        // 2. Auto-fill the hidden input boxes
-        document.getElementById('receiver-pin').value = pin;
-        document.getElementById('receiver-otp').value = otp;
-        
-        // 3. Force navigation to the receiver screen
-        if (typeof window.navTo === 'function') {
-            window.navTo('view-receive', false);
-        }
-        
-        // 4. Safely trigger the unlock mechanism now that the listener exists
-        setTimeout(() => {
-            if (verifyBtn) verifyBtn.click();
-        }, 50); 
-    }
+if (isQRScanned) {
+    // Fill the inputs immediately
+    document.getElementById('receiver-pin').value = qrPin;
+    document.getElementById('receiver-otp').value = qrOtp;
+    
+    // Switch to receive view instantly
+    window.navTo('view-receive', false);
+    
+    // Directly run the unlock pipeline
+    processVerification(qrPin, qrOtp);
 }
-// Execute immediately upon load
-executeQROverride();
