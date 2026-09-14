@@ -8,40 +8,14 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
-  <!-- INSTANT CHECK: If QR code scanned, bypass animation immediately before first paint -->
-  <script>
-    (function() {
-      var p = new URLSearchParams(window.location.search);
-      if (p.get('pin') && p.get('otp')) {
-        document.documentElement.classList.add('qr-scanned-mode');
-      }
-    })();
-  </script>
-
   <style>
     /* ---------- RESET & VARIABLES ---------- */
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    :root {
-      --bg-cream: #FDF9F0; --bg-soft: #F6F2EA; --ink: #1A1A2C; --ink-soft: #3D3D5C;
-      --muted: #7C7C96; --card-bg: #FFFFFF; --card-border: #E8E4DC; --primary: #3F5EFF;
-      --primary-glow: #3F5EFF40; --primary-soft: #EEF1FF; --violet: #8B5CF6;
-      --coral: #FF6B6B; --coral-soft: #FFE8E8; --mint: #2DD4BF; --mint-soft: #E0F7F3;
-      --amber: #F59E0B; --amber-soft: #FEF3C7; --radius-lg: 32px; --radius-md: 20px;
-      --radius-sm: 14px; --shadow-card: 0 12px 32px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.02);
-      --shadow-hover: 0 20px 40px rgba(63, 94, 255, 0.12); --font: 'Manrope', -apple-system, system-ui, sans-serif;
-      --transition-fast: 180ms cubic-bezier(0.2, 0, 0, 1); --transition-smooth: 400ms cubic-bezier(0.2, 0, 0, 1);
-      --transition-spring: 600ms cubic-bezier(0.2, 0.9, 0.3, 1.1);
-    }
+    :root { --bg-cream: #FDF9F0; --bg-soft: #F6F2EA; --ink: #1A1A2C; --ink-soft: #3D3D5C; --muted: #7C7C96; --card-bg: #FFFFFF; --card-border: #E8E4DC; --primary: #3F5EFF; --primary-glow: #3F5EFF40; --primary-soft: #EEF1FF; --violet: #8B5CF6; --coral: #FF6B6B; --coral-soft: #FFE8E8; --mint: #2DD4BF; --mint-soft: #E0F7F3; --amber: #F59E0B; --amber-soft: #FEF3C7; --radius-lg: 32px; --radius-md: 20px; --radius-sm: 14px; --shadow-card: 0 12px 32px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.02); --shadow-hover: 0 20px 40px rgba(63, 94, 255, 0.12); --font: 'Manrope', -apple-system, system-ui, sans-serif; --transition-fast: 180ms cubic-bezier(0.2, 0, 0, 1); --transition-smooth: 400ms cubic-bezier(0.2, 0, 0, 1); --transition-spring: 600ms cubic-bezier(0.2, 0.9, 0.3, 1.1); }
+    html, body { height: 100%; font-family: var(--font); background: var(--bg-cream); color: var(--ink); overflow-x: hidden; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
 
-    html, body {
-      height: 100%; font-family: var(--font); background: var(--bg-cream); color: var(--ink);
-      overflow-x: hidden; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
-    }
-
-    /* IF QR SCANNED: Hide intro completely & make app container visible instantly */
-    .qr-scanned-mode #intro-animation { display: none !important; }
-    .qr-scanned-mode .app-container { opacity: 1 !important; transform: none !important; }
+    /* ---------- PREFERS REDUCED MOTION ---------- */
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; } .floating-doodle { display: none; } .moving-border-svg rect { animation: none; } }
 
     /* ---------- DOODLE BACKGROUND ---------- */
     .doodle-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
@@ -62,11 +36,7 @@
     @keyframes blobFloat { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(40px, -30px) scale(1.1); } }
 
     /* ---------- INTRO OVERLAY ---------- */
-    #intro-animation {
-      position: fixed; inset: 0; background: var(--bg-cream); z-index: 3000;
-      display: flex; flex-direction: column; justify-content: center; align-items: center;
-      transition: opacity 0.6s ease, transform 0.6s ease;
-    }
+    #intro-animation { position: fixed; inset: 0; background: var(--bg-cream); z-index: 3000; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.6s ease, transform 0.6s ease; }
     .intro-sequence { display: flex; align-items: center; gap: 16px; font-size: 64px; margin-bottom: 24px; }
     .intro-item { opacity: 0; transform: scale(0.3) rotate(-8deg); display: inline-block; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.06)); }
     .intro-doc { animation: popIn 0.5s forwards 0.15s; }
@@ -83,12 +53,7 @@
     .intro-fade-out { opacity: 0; transform: scale(1.06); pointer-events: none; }
 
     /* ---------- APP CONTAINER ---------- */
-    .app-container {
-      position: relative; z-index: 2; opacity: 0; transform: translateY(30px);
-      transition: opacity 0.8s cubic-bezier(0.2, 0.9, 0.3, 1), transform 0.8s cubic-bezier(0.2, 0.9, 0.3, 1);
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      min-height: 100vh; padding: 24px 20px 40px;
-    }
+    .app-container { position: relative; z-index: 2; opacity: 0; transform: translateY(30px); transition: opacity 0.8s cubic-bezier(0.2, 0.9, 0.3, 1), transform 0.8s cubic-bezier(0.2, 0.9, 0.3, 1); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 24px 20px 40px; }
     .app-container.visible { opacity: 1; transform: translateY(0); }
 
     .logo { font-size: 1.75rem; font-weight: 900; letter-spacing: -0.04em; color: var(--ink); margin-bottom: 32px; display: flex; align-items: center; gap: 6px; user-select: none; }
@@ -247,7 +212,6 @@
       <div id="view-landing" class="view active" role="main">
         <div class="hero-section">
           <h1 class="hero-title">Send files.<br><span class="highlight">Like magic.</span></h1>
-          <!-- Updated instructions per request -->
           <p class="hero-sub">Just upload files, set a temporary 4-digit PIN, and download them on any other device instantly.</p>
           <div class="quick-steps-bar">
             <span class="step-badge">1. Pick files</span>
@@ -382,17 +346,27 @@
 
   <script>
     (function() {
+      // 1. FORCE THE INTRO ANIMATION TO HIDE IF A QR CODE IS SCANNED
       var intro = document.getElementById('intro-animation');
       var app = document.getElementById('app-container');
       var p = new URLSearchParams(window.location.search);
+      var isQR = p.get('pin') && p.get('otp');
 
-      // Normal visit: Play intro. If QR scanned, the head script already hid it!
-      if (intro && app && !p.get('pin')) {
-        setTimeout(function() {
-          intro.classList.add('intro-fade-out');
+      if (intro && app) {
+        if (isQR) {
+          // Bypass intro instantly
+          intro.style.display = 'none';
           app.classList.add('visible');
-          setTimeout(function() { intro.style.display = 'none'; }, 650);
-        }, 2600);
+          app.style.opacity = '1';
+          app.style.transform = 'translateY(0)';
+        } else {
+          // Play normal 3-second magic intro
+          setTimeout(function() {
+            intro.classList.add('intro-fade-out');
+            app.classList.add('visible');
+            setTimeout(function() { intro.style.display = 'none'; }, 650);
+          }, 2600);
+        }
       }
 
       window.navTo = function(viewId) {
