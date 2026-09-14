@@ -5,7 +5,7 @@ import { supabaseUrl, supabaseKey } from './config.js';
 // Initialize Supabase
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// --- DETECT QR PARAMETERS BEFORE HISTORY MODIFICATION ---
+// --- DETECT QR PARAMETERS ---
 const urlParams = new URLSearchParams(window.location.search);
 const qrPin = urlParams.get('pin');
 const qrOtp = urlParams.get('otp');
@@ -13,7 +13,7 @@ const isQRScanned = Boolean(qrPin && qrOtp);
 
 // --- NAVIGATION & HISTORY API ---
 if (!history.state) {
-    history.replaceState({ view: 'view-landing' }, '', window.location.pathname);
+    history.replaceState({ view: isQRScanned ? 'view-receive' : 'view-landing' }, '', window.location.pathname);
 }
 
 window.navTo = function(viewId, pushHistory = true) {
@@ -41,10 +41,9 @@ window.navTo = function(viewId, pushHistory = true) {
         const vaultGrid = document.getElementById('vault-grid');
         if (vaultGrid) vaultGrid.innerHTML = '';
 
-        // Safely clear out any lingering URL parameters
+        // Reset URL completely (No lingering ?pin= parameters)
         window.history.replaceState({ view: 'view-landing' }, '', window.location.pathname);
     }
-    // =========================================================
 
     if (pushHistory) {
         let url = viewId === 'view-landing' ? window.location.pathname : window.location.pathname + '#' + viewId;
@@ -269,6 +268,9 @@ async function processVerification(pin, otp) {
         renderVault();
         window.navTo('view-vault');
         
+        // After successfully opening vault, erase the parameters from the URL
+        window.history.replaceState({ view: 'view-vault' }, '', window.location.pathname + '#view-vault');
+
         if (verifyBtn) {
             verifyBtn.innerHTML = '<span aria-hidden="true">🔓</span> unlock vault'; 
             verifyBtn.disabled = false;
@@ -413,16 +415,15 @@ window.printFile = function(url, type) {
 // --- AUTOMATIC DIRECT EXECUTION UPON SCANNING QR ---
 // =========================================================================
 if (isQRScanned) {
-    // 1. Wipe the ?pin=... parameters instantly so a refresh won't get stuck
-    window.history.replaceState({ view: 'view-receive' }, '', window.location.pathname);
-    
-    // 2. Fill the inputs
+    // Fill the inputs immediately
     const rxPin = document.getElementById('receiver-pin');
     const rxOtp = document.getElementById('receiver-otp');
     if (rxPin) rxPin.value = qrPin;
     if (rxOtp) rxOtp.value = qrOtp;
     
-    // 3. Switch screen and unlock
+    // Switch to receive view instantly without keeping params in URL history
     window.navTo('view-receive', false);
+    
+    // Directly run the unlock pipeline
     processVerification(qrPin, qrOtp);
 }
