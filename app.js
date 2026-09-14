@@ -5,17 +5,15 @@ import { supabaseUrl, supabaseKey } from './config.js';
 // Initialize Supabase
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// --- DETECT QR PARAMETERS BEFORE ANY HISTORY MANIPULATION ---
+// --- DETECT QR PARAMETERS BEFORE HISTORY MODIFICATION ---
 const urlParams = new URLSearchParams(window.location.search);
 const qrPin = urlParams.get('pin');
 const qrOtp = urlParams.get('otp');
 const isQRScanned = Boolean(qrPin && qrOtp);
 
-// --- HISTORY API & NAVIGATION ---
+// --- NAVIGATION & HISTORY API ---
 if (!history.state) {
-    const targetUrl = isQRScanned ? window.location.href : window.location.pathname;
-    const initialView = isQRScanned ? 'view-receive' : 'view-landing';
-    history.replaceState({ view: initialView }, '', targetUrl);
+    history.replaceState({ view: 'view-landing' }, '', window.location.pathname);
 }
 
 window.navTo = function(viewId, pushHistory = true) {
@@ -24,10 +22,9 @@ window.navTo = function(viewId, pushHistory = true) {
     if (target) target.classList.add('active');
     
     // =========================================================
-    // FIX: CLEAR ALL DATA WHEN RETURNING TO THE HOME PAGE
+    // FIX: COMPLETELY CLEAR ALL FORMS WHEN GOING TO HOME PAGE
     // =========================================================
     if (viewId === 'view-landing') {
-        // Clear Receive Inputs
         const rxPin = document.getElementById('receiver-pin');
         const rxOtp = document.getElementById('receiver-otp');
         const rxStatus = document.getElementById('receive-status');
@@ -35,22 +32,21 @@ window.navTo = function(viewId, pushHistory = true) {
         if (rxOtp) rxOtp.value = '';
         if (rxStatus) rxStatus.innerText = '';
         
-        // Clear Sender Inputs
         const txPin = document.getElementById('sender-pin');
         const txMax = document.getElementById('max-downloads');
         if (txPin) txPin.value = '';
         if (txMax) txMax.value = '';
         
-        // Clear Vault Memory
         vaultFilesData = [];
         const vaultGrid = document.getElementById('vault-grid');
         if (vaultGrid) vaultGrid.innerHTML = '';
+
+        // Safely clear out any lingering URL parameters
+        window.history.replaceState({ view: 'view-landing' }, '', window.location.pathname);
     }
     // =========================================================
 
     if (pushHistory) {
-        // By using just the pathname for landing, it scrubs the ?pin= URL parameters 
-        // so a page refresh on the home screen won't accidentally trigger a scan again!
         let url = viewId === 'view-landing' ? window.location.pathname : window.location.pathname + '#' + viewId;
         history.pushState({ view: viewId }, '', url);
     }
@@ -417,8 +413,16 @@ window.printFile = function(url, type) {
 // --- AUTOMATIC DIRECT EXECUTION UPON SCANNING QR ---
 // =========================================================================
 if (isQRScanned) {
-    document.getElementById('receiver-pin').value = qrPin;
-    document.getElementById('receiver-otp').value = qrOtp;
+    // 1. Wipe the ?pin=... parameters instantly so a refresh won't get stuck
+    window.history.replaceState({ view: 'view-receive' }, '', window.location.pathname);
+    
+    // 2. Fill the inputs
+    const rxPin = document.getElementById('receiver-pin');
+    const rxOtp = document.getElementById('receiver-otp');
+    if (rxPin) rxPin.value = qrPin;
+    if (rxOtp) rxOtp.value = qrOtp;
+    
+    // 3. Switch screen and unlock
     window.navTo('view-receive', false);
     processVerification(qrPin, qrOtp);
 }
