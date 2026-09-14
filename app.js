@@ -23,46 +23,16 @@ window.navTo = function(viewId, pushHistory = true) {
 };
 
 window.addEventListener('popstate', (e) => {
-    // If preview modal is open, phone back button closes modal first
     const modal = document.getElementById('preview-modal');
     if (modal && modal.classList.contains('active')) {
         window.closePreview(false);
     } 
-    // Otherwise go to the previous screen
     else if (e.state && e.state.view) {
         window.navTo(e.state.view, false);
     } else {
         window.navTo('view-landing', false);
     }
 });
-
-// --- QR CODE AUTO-SCAN LOGIC ---
-const urlParams = new URLSearchParams(window.location.search);
-const pin = urlParams.get('pin');
-const otp = urlParams.get('otp');
-
-if (pin && otp) {
-    // 1. Instantly hide the 3-second intro animation since they are scanning a QR code
-    const intro = document.getElementById('intro-animation');
-    const appContainer = document.getElementById('app-container');
-    if (intro) intro.style.display = 'none';
-    if (appContainer) appContainer.classList.add('visible');
-
-    // 2. Auto-fill the credentials
-    document.getElementById('receiver-pin').value = pin;
-    document.getElementById('receiver-otp').value = otp;
-    
-    // 3. Navigate straight to the receive screen
-    window.navTo('view-receive');
-    
-    // 4. Automatically click the unlock button to fetch the files
-    setTimeout(() => {
-        const verifyBtn = document.getElementById('verify-btn');
-        if (verifyBtn) {
-            verifyBtn.click();
-        }
-    }, 100); // Tiny delay ensures the UI has switched before clicking
-}
 
 // --- FILE SELECTION & DRAG DROP ---
 let selectedFilesArray = [];
@@ -74,7 +44,6 @@ fileInput.addEventListener('change', (e) => handleNewFiles(e.target.files));
 
 function handleNewFiles(files) {
     Array.from(files).forEach(file => {
-        // Prevent duplicates
         if (!selectedFilesArray.some(f => f.name === file.name && f.size === file.size)) {
             selectedFilesArray.push(file);
         }
@@ -109,7 +78,6 @@ function renderFileList() {
         `;
     });
 
-    // 50MB Limit Validation
     if (totalSize > 50 * 1024 * 1024) {
         uploadBtn.classList.add('danger-btn');
         document.getElementById('upload-text').innerText = 'Size Exceeds 50MB';
@@ -129,7 +97,6 @@ uploadBtn.addEventListener('click', async () => {
     if (!pin || pin.length !== 4) return alert('Please enter a 4-digit PIN.');
     if (selectedFilesArray.length === 0) return alert('Add files first!');
 
-    // UI Updates for uploading
     uploadBtn.disabled = true;
     document.getElementById('upload-text').innerText = 'PACKING...';
     
@@ -141,7 +108,6 @@ uploadBtn.addEventListener('click', async () => {
         let totalSize = 0;
         document.getElementById('upload-text').innerText = 'SENDING...';
 
-        // 1. Upload to Storage Bucket
         for (let file of selectedFilesArray) {
             const fileName = `${Date.now()}_${file.name}`;
             const { error } = await supabase.storage.from('quickshares_files').upload(fileName, file);
@@ -150,15 +116,9 @@ uploadBtn.addEventListener('click', async () => {
             totalSize += file.size;
         }
 
-        // 2. Create Database Row
         const { data: shareData, error: dbError } = await supabase
             .from('shares')
-            .insert([{ 
-                pin: pin, 
-                file_paths: filePaths, 
-                total_size_bytes: totalSize, 
-                max_downloads: maxDownloads 
-            }])
+            .insert([{ pin: pin, file_paths: filePaths, total_size_bytes: totalSize, max_downloads: maxDownloads }])
             .select()
             .single();
 
@@ -169,14 +129,15 @@ uploadBtn.addEventListener('click', async () => {
         setTimeout(() => {
             if(transferAnim) transferAnim.classList.remove('active');
             
-            // Setup Active Session UI
             document.getElementById('display-pin').innerText = shareData.pin;
             document.getElementById('display-otp').innerText = shareData.otp;
             document.getElementById('download-max').innerText = shareData.max_downloads || '∞';
             
-            // Generate QR Code containing the URL with parameters
+            // Clean URL generation for the QR Code
             document.getElementById('qrcode').innerHTML = '';
-            const magicLink = `${window.location.origin}${window.location.pathname}?pin=${shareData.pin}&otp=${shareData.otp}`;
+            const baseUrl = window.location.origin + window.location.pathname;
+            const magicLink = `${baseUrl}?pin=${shareData.pin}&otp=${shareData.otp}`;
+            
             new QRCode(document.getElementById('qrcode'), { 
                 text: magicLink, 
                 width: 150, 
@@ -187,9 +148,9 @@ uploadBtn.addEventListener('click', async () => {
             });
 
             window.navTo('view-active');
-            startTimer(300); // 5 minutes
+            startTimer(300); 
             subscribeToRealtime(shareData.id);
-        }, 600); // Let them see "SENT" briefly before switching screens
+        }, 600);
 
     } catch (err) {
         alert('Upload failed: ' + err.message);
@@ -231,12 +192,12 @@ function subscribeToRealtime(shareId) {
 
 // --- RECEIVE FLOW (Unlock Vault) ---
 let vaultFilesData = []; 
+const verifyBtn = document.getElementById('verify-btn');
 
-document.getElementById('verify-btn').addEventListener('click', async () => {
+verifyBtn.addEventListener('click', async () => {
     const pin = document.getElementById('receiver-pin').value;
     const otp = document.getElementById('receiver-otp').value;
     const statusText = document.getElementById('receive-status');
-    const verifyBtn = document.getElementById('verify-btn');
 
     if (!pin || !otp) {
         statusText.innerText = 'Enter both PIN and OTP';
@@ -248,16 +209,12 @@ document.getElementById('verify-btn').addEventListener('click', async () => {
     statusText.innerText = '';
 
     try {
-        // RPC call checks credentials & increments download count
         const { data, error } = await supabase.rpc('verify_and_download', { p_pin: pin, p_otp: otp });
         
-        if (error || !data || data.length === 0) {
-            throw new Error('Invalid credentials or session expired.');
-        }
+        if (error || !data || data.length === 0) throw new Error('Invalid credentials or session expired.');
 
         vaultFilesData = [];
         
-        // Generate Signed URLs for the files
         for (let path of data[0].files) {
             const { data: urlData } = await supabase.storage.from('quickshares_files').createSignedUrl(path, 60);
             if (urlData) {
@@ -272,7 +229,7 @@ document.getElementById('verify-btn').addEventListener('click', async () => {
                     url: urlData.signedUrl, 
                     name: originalName, 
                     type: type,
-                    sizeRaw: path // Just a reference
+                    sizeRaw: path
                 });
             }
         }
@@ -280,7 +237,6 @@ document.getElementById('verify-btn').addEventListener('click', async () => {
         renderVault();
         window.navTo('view-vault');
         
-        // Reset verify button
         verifyBtn.innerHTML = '<span aria-hidden="true">🔓</span> unlock vault'; 
         verifyBtn.disabled = false;
         
@@ -322,7 +278,6 @@ window.openPreview = function(index) {
     let downloadAction = `downloadSilent('${file.url}', '${file.name}')`;
     let printAction = `printFile('${file.url}', '${file.type}')`;
 
-    // Render appropriate viewer based on file type
     if(file.type === 'image') {
         content.innerHTML = `<img src="${file.url}" alt="${file.name}">`;
         actions.innerHTML = `
@@ -345,7 +300,7 @@ window.openPreview = function(index) {
 
 window.closePreview = function(goBack = true) {
     if(goBack && history.state && history.state.modal) { 
-        history.back(); // Triggers popstate to run the cleanup
+        history.back();
     } else { 
         const modal = document.getElementById('preview-modal');
         if(modal) modal.classList.remove('active'); 
@@ -364,7 +319,7 @@ window.downloadAllFiles = async function() {
 
     for(let file of vaultFilesData) {
         await window.downloadSilent(file.url, file.name);
-        await new Promise(r => setTimeout(r, 600)); // Prevent browser from blocking multi-downloads
+        await new Promise(r => setTimeout(r, 600)); 
     }
     
     setTimeout(() => {
@@ -374,7 +329,6 @@ window.downloadAllFiles = async function() {
     }, 1500);
 };
 
-// Uses Fetch API to download via Blob, completely hiding the Supabase URL from the user's address bar
 window.downloadSilent = async function(url, filename) {
     try {
         const response = await fetch(url);
@@ -407,3 +361,44 @@ window.printFile = function(url, type) {
         iframe.onload = () => iframe.contentWindow.print();
     }
 };
+
+// =========================================================================
+// --- OVERRIDE: THE BULLETPROOF QR CODE AUTO-SCAN LOGIC ---
+// Placing this at the very bottom ensures all DOM elements and listeners 
+// (especially the 'verify-btn' click listener) are fully registered before running.
+// =========================================================================
+function executeQROverride() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const pin = urlParams.get('pin');
+    const otp = urlParams.get('otp');
+
+    if (pin && otp) {
+        // 1. Force the Intro UI to hide immediately
+        const intro = document.getElementById('intro-animation');
+        const appContainer = document.getElementById('app-container');
+        if (intro) {
+            intro.style.display = 'none';
+            intro.style.opacity = '0';
+        }
+        if (appContainer) {
+            appContainer.classList.add('visible');
+            appContainer.style.opacity = '1';
+        }
+
+        // 2. Auto-fill the hidden input boxes
+        document.getElementById('receiver-pin').value = pin;
+        document.getElementById('receiver-otp').value = otp;
+        
+        // 3. Force navigation to the receiver screen
+        if (typeof window.navTo === 'function') {
+            window.navTo('view-receive', false);
+        }
+        
+        // 4. Safely trigger the unlock mechanism now that the listener exists
+        setTimeout(() => {
+            if (verifyBtn) verifyBtn.click();
+        }, 50); 
+    }
+}
+// Execute immediately upon load
+executeQROverride();
