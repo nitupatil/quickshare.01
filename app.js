@@ -13,7 +13,6 @@ const isQRScanned = Boolean(qrPin && qrOtp);
 
 // --- HISTORY API & NAVIGATION ---
 if (!history.state) {
-    // CRITICAL FIX: Do NOT erase the query string when QR parameters exist!
     const targetUrl = isQRScanned ? window.location.href : window.location.pathname;
     const initialView = isQRScanned ? 'view-receive' : 'view-landing';
     history.replaceState({ view: initialView }, '', targetUrl);
@@ -24,11 +23,35 @@ window.navTo = function(viewId, pushHistory = true) {
     const target = document.getElementById(viewId);
     if (target) target.classList.add('active');
     
+    // =========================================================
+    // FIX: CLEAR ALL DATA WHEN RETURNING TO THE HOME PAGE
+    // =========================================================
+    if (viewId === 'view-landing') {
+        // Clear Receive Inputs
+        const rxPin = document.getElementById('receiver-pin');
+        const rxOtp = document.getElementById('receiver-otp');
+        const rxStatus = document.getElementById('receive-status');
+        if (rxPin) rxPin.value = '';
+        if (rxOtp) rxOtp.value = '';
+        if (rxStatus) rxStatus.innerText = '';
+        
+        // Clear Sender Inputs
+        const txPin = document.getElementById('sender-pin');
+        const txMax = document.getElementById('max-downloads');
+        if (txPin) txPin.value = '';
+        if (txMax) txMax.value = '';
+        
+        // Clear Vault Memory
+        vaultFilesData = [];
+        const vaultGrid = document.getElementById('vault-grid');
+        if (vaultGrid) vaultGrid.innerHTML = '';
+    }
+    // =========================================================
+
     if (pushHistory) {
-        // Retain the query string so refreshing never breaks QR mode
-        const search = window.location.search;
-        let url = viewId === 'view-landing' ? window.location.pathname : '#' + viewId;
-        if (isQRScanned) url = window.location.pathname + search + '#' + viewId;
+        // By using just the pathname for landing, it scrubs the ?pin= URL parameters 
+        // so a page refresh on the home screen won't accidentally trigger a scan again!
+        let url = viewId === 'view-landing' ? window.location.pathname : window.location.pathname + '#' + viewId;
         history.pushState({ view: viewId }, '', url);
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -144,7 +167,6 @@ uploadBtn.addEventListener('click', async () => {
             document.getElementById('display-otp').innerText = shareData.otp;
             document.getElementById('download-max').innerText = shareData.max_downloads || '∞';
             
-            // Clean QR Code URL generation
             document.getElementById('qrcode').innerHTML = '';
             const baseUrl = window.location.origin + window.location.pathname;
             const magicLink = `${baseUrl}?pin=${shareData.pin}&otp=${shareData.otp}`;
@@ -337,7 +359,7 @@ window.closePreview = function(goBack = true) {
     }
 };
 
-// --- SILENT BLOB DOWNLOAD (HIDES SUPABASE URL) ---
+// --- SILENT BLOB DOWNLOAD ---
 window.downloadAllFiles = async function() {
     const btn = document.getElementById('download-all-btn');
     const originalText = document.getElementById('dl-text').innerText;
@@ -395,13 +417,8 @@ window.printFile = function(url, type) {
 // --- AUTOMATIC DIRECT EXECUTION UPON SCANNING QR ---
 // =========================================================================
 if (isQRScanned) {
-    // Fill the inputs immediately
     document.getElementById('receiver-pin').value = qrPin;
     document.getElementById('receiver-otp').value = qrOtp;
-    
-    // Switch to receive view instantly
     window.navTo('view-receive', false);
-    
-    // Directly run the unlock pipeline
     processVerification(qrPin, qrOtp);
 }
