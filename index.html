@@ -11,7 +11,7 @@
   gtag('config', 'G-57JBSHMW9Y');
 </script>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=no">
   
   <!-- SEO Optimization -->
   <title>Quickshares.online | Fast & Secure Quick File Share Online</title>
@@ -61,7 +61,9 @@
     /* ---------- RESET & VARIABLES ---------- */
     * { margin: 0; padding: 0; box-sizing: border-box; }
     :root { --bg-cream: #FDF9F0; --bg-soft: #F6F2EA; --ink: #1A1A2C; --ink-soft: #3D3D5C; --muted: #7C7C96; --card-bg: #FFFFFF; --card-border: #E8E4DC; --primary: #3F5EFF; --primary-glow: #3F5EFF40; --primary-soft: #EEF1FF; --violet: #8B5CF6; --coral: #FF6B6B; --coral-soft: #FFE8E8; --mint: #2DD4BF; --mint-soft: #E0F7F3; --amber: #F59E0B; --amber-soft: #FEF3C7; --radius-lg: 32px; --radius-md: 20px; --radius-sm: 14px; --shadow-card: 0 12px 32px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.02); --shadow-hover: 0 20px 40px rgba(63, 94, 255, 0.12); --font: 'Manrope', -apple-system, system-ui, sans-serif; --transition-fast: 180ms cubic-bezier(0.2, 0, 0, 1); --transition-smooth: 400ms cubic-bezier(0.2, 0, 0, 1); --transition-spring: 600ms cubic-bezier(0.2, 0.9, 0.3, 1.1); }
-    html, body { height: 100%; font-family: var(--font); background: var(--bg-cream); color: var(--ink); overflow-x: hidden; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    
+    /* MODIFIED FOR NO SCROLL */
+    html, body { height: 100vh; width: 100vw; overflow: hidden; font-family: var(--font); background: var(--bg-cream); color: var(--ink); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; touch-action: none; }
 
     /* ---------- PREFERS REDUCED MOTION ---------- */
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; } .floating-doodle { display: none; } .moving-border-svg rect { animation: none; } }
@@ -105,99 +107,101 @@
     @keyframes fadeInUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
     .intro-fade-out { opacity: 0; transform: scale(1.06); pointer-events: none; }
 
-    /* ---------- APP CONTAINER ---------- */
-    .app-container { position: relative; z-index: 2; opacity: 0; transform: translateY(30px); transition: opacity 0.8s cubic-bezier(0.2, 0.9, 0.3, 1), transform 0.8s cubic-bezier(0.2, 0.9, 0.3, 1); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 24px 20px 40px; }
+    /* ---------- APP CONTAINER - MODIFIED FOR NO SCROLL ---------- */
+    .app-container { position: relative; z-index: 2; opacity: 0; transform: translateY(30px); transition: opacity 0.8s cubic-bezier(0.2, 0.9, 0.3, 1), transform 0.8s cubic-bezier(0.2, 0.9, 0.3, 1); display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; width: 100vw; padding: 10px; overflow: hidden; box-sizing: border-box; }
     .app-container.visible { opacity: 1; transform: translateY(0); }
 
-    .logo { font-size: 1.75rem; font-weight: 900; letter-spacing: -0.04em; color: var(--ink); margin-bottom: 32px; display: flex; align-items: center; gap: 6px; user-select: none; }
-    .logo-icon { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: var(--primary); border-radius: 10px; color: white; font-size: 1.2rem; transform: rotate(-4deg); transition: transform var(--transition-fast); box-shadow: 0 4px 12px var(--primary-glow); }
+    .logo { font-size: 1.5rem; font-weight: 900; letter-spacing: -0.04em; color: var(--ink); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; user-select: none; }
+    .logo-icon { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: var(--primary); border-radius: 10px; color: white; font-size: 1.1rem; transform: rotate(-4deg); transition: transform var(--transition-fast); box-shadow: 0 4px 12px var(--primary-glow); }
     .logo:hover .logo-icon { transform: rotate(4deg) scale(1.05); }
     .logo-text { background: linear-gradient(135deg, var(--primary) 0%, var(--violet) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .logo-dot { color: var(--coral); font-size: 2rem; line-height: 0; margin-left: 2px; }
+    .logo-dot { color: var(--coral); font-size: 1.8rem; line-height: 0; margin-left: 2px; }
 
-    .glass-panel { background: var(--card-bg); border: 1.5px solid var(--card-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); width: 100%; max-width: 580px; padding: 32px 28px; position: relative; overflow: hidden; transition: box-shadow var(--transition-smooth), border-color var(--transition-smooth); margin: 0 auto; }
+    .glass-panel { background: var(--card-bg); border: 1.5px solid var(--card-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); width: 100%; max-width: 580px; padding: 16px 20px; position: relative; transition: box-shadow var(--transition-smooth), border-color var(--transition-smooth); margin: 0 auto; display: flex; flex-direction: column; }
     .glass-panel::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, var(--primary) 0%, var(--violet) 50%, var(--coral) 100%); border-radius: var(--radius-lg) var(--radius-lg) 0 0; opacity: 0.7; }
     
     .landing-wrapper { width: 100%; max-width: 524px; margin: 0 auto; }
     
-    .view { display: none; opacity: 0; transition: opacity 0.35s; }
+    .view { display: none; opacity: 0; transition: opacity 0.35s; width: 100%; max-width: 580px; max-height: 80vh; overflow-y: auto; scrollbar-width: none; }
+    .view::-webkit-scrollbar { display: none; }
     .view.active { display: block; opacity: 1; animation: viewIn 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.1) forwards; }
     @keyframes viewIn { from { opacity: 0; transform: translateY(14px) scale(0.99); } to { opacity: 1; transform: translateY(0) scale(1); } }
 
     /* ---------- HERO LANDING ---------- */
-    .hero-section { text-align: center; margin-bottom: 24px; }
-    .hero-title { font-size: 2.3rem; font-weight: 900; line-height: 1.1; letter-spacing: -0.04em; color: var(--ink); margin-bottom: 8px; }
+    .hero-section { text-align: center; margin-bottom: 12px; }
+    .hero-title { font-size: 1.8rem; font-weight: 900; line-height: 1.1; letter-spacing: -0.04em; color: var(--ink); margin-bottom: 6px; }
     .hero-title .highlight { background: linear-gradient(135deg, var(--primary), var(--violet)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .hero-sub { font-size: 0.95rem; font-weight: 600; color: var(--muted); line-height: 1.5; max-width: 420px; margin: 0 auto; }
+    .hero-sub { font-size: 0.85rem; font-weight: 600; color: var(--muted); line-height: 1.4; max-width: 420px; margin: 0 auto; }
 
-    .quick-steps-bar { display: flex; justify-content: center; gap: 8px; margin: 18px 0 6px; font-size: 0.78rem; font-weight: 700; color: var(--ink-soft); flex-wrap: wrap; }
-    .step-badge { background: var(--bg-soft); padding: 5px 12px; border-radius: 100px; border: 1px solid var(--card-border); }
+    .quick-steps-bar { display: flex; justify-content: center; gap: 6px; margin: 10px 0 4px; font-size: 0.7rem; font-weight: 700; color: var(--ink-soft); flex-wrap: wrap; }
+    .step-badge { background: var(--bg-soft); padding: 4px 10px; border-radius: 100px; border: 1px solid var(--card-border); }
 
-    .transfer-illustration { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 16px 0 24px; position: relative; min-height: 80px; }
-    .device-icon { width: 52px; height: 52px; background: var(--bg-soft); border-radius: 16px; display: flex; align-items: center; justify-content: center; border: 1.5px solid var(--card-border); font-size: 1.5rem; flex-shrink: 0; transition: transform var(--transition-smooth); }
-    .transfer-path { flex: 1; max-width: 120px; height: 40px; position: relative; display: flex; align-items: center; justify-content: center; }
+    .transfer-illustration { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 10px 0 16px; position: relative; min-height: 60px; }
+    .device-icon { width: 44px; height: 44px; background: var(--bg-soft); border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 1.5px solid var(--card-border); font-size: 1.2rem; flex-shrink: 0; transition: transform var(--transition-smooth); }
+    .transfer-path { flex: 1; max-width: 100px; height: 30px; position: relative; display: flex; align-items: center; justify-content: center; }
     .transfer-path svg { width: 100%; height: 100%; overflow: visible; }
     .transfer-path .dotted-line { stroke: var(--primary); stroke-width: 2.5; stroke-dasharray: 6 8; fill: none; opacity: 0.6; animation: dashMove 1.2s linear infinite; }
     @keyframes dashMove { to { stroke-dashoffset: -28; } }
-    .flying-file { position: absolute; top: 50%; left: 0; transform: translateY(-50%); font-size: 1.4rem; animation: flyAcross 2.4s ease-in-out infinite; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.08)); }
+    .flying-file { position: absolute; top: 50%; left: 0; transform: translateY(-50%); font-size: 1.2rem; animation: flyAcross 2.4s ease-in-out infinite; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.08)); }
     @keyframes flyAcross { 0% { left: -5%; opacity: 0; transform: translateY(-50%) scale(0.6) rotate(-10deg); } 15% { opacity: 1; transform: translateY(-50%) scale(1) rotate(0deg); } 85% { opacity: 1; transform: translateY(-50%) scale(1) rotate(0deg); } 100% { left: 105%; opacity: 0; transform: translateY(-50%) scale(0.6) rotate(10deg); } }
 
-    .split-landing { display: flex; flex-direction: column; gap: 12px; }
-    @media (min-width: 480px) { .split-landing { flex-direction: row; gap: 14px; } }
+    /* FORCE SPLIT LANDING SIDE-BY-SIDE */
+    .split-landing { display: flex; flex-direction: row; gap: 10px; }
     
-    .split-btn { position: relative; flex: 1; background: var(--card-bg); border: 2px solid var(--card-border); border-radius: var(--radius-md); cursor: pointer; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 24px 16px; font-size: 1.1rem; font-weight: 700; color: var(--ink); transition: all var(--transition-smooth); box-shadow: var(--shadow-card); overflow: hidden; text-align: center; }
-    .split-btn .btn-doodle { width: 48px; height: 48px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; background: var(--primary-soft); border-radius: 14px; font-size: 1.5rem; transition: transform var(--transition-spring); }
+    .split-btn { position: relative; flex: 1; background: var(--card-bg); border: 2px solid var(--card-border); border-radius: var(--radius-md); cursor: pointer; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 12px 10px; font-size: 0.95rem; font-weight: 700; color: var(--ink); transition: all var(--transition-smooth); box-shadow: var(--shadow-card); overflow: hidden; text-align: center; }
+    .split-btn .btn-doodle { width: 36px; height: 36px; margin-bottom: 6px; display: flex; align-items: center; justify-content: center; background: var(--primary-soft); border-radius: 10px; font-size: 1.2rem; transition: transform var(--transition-spring); }
     .split-btn[data-action="send"] .btn-doodle { background: var(--primary-soft); color: var(--primary); }
     .split-btn[data-action="receive"] .btn-doodle { background: var(--mint-soft); color: var(--mint); }
-    .split-btn:hover { border-color: var(--primary); box-shadow: var(--shadow-hover); transform: translateY(-4px); }
+    .split-btn:hover { border-color: var(--primary); box-shadow: var(--shadow-hover); transform: translateY(-2px); }
     .split-btn:hover .btn-doodle { transform: scale(1.12) rotate(-6deg); }
     .split-btn .moving-border-svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; border-radius: var(--radius-md); opacity: 0; transition: opacity var(--transition-smooth); }
     .split-btn:hover .moving-border-svg { opacity: 1; }
     .moving-border-svg rect { width: 100%; height: 100%; fill: none; stroke: var(--primary); stroke-width: 2; stroke-dasharray: 10 12; animation: march 1s linear infinite; rx: 20; ry: 20; }
-    @keyframes march { to { stroke-dashoffset: -22; } }
 
-    .back-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-weight: 700; font-size: 0.9rem; margin-bottom: 20px; padding: 6px 0; display: inline-flex; align-items: center; gap: 6px; font-family: var(--font); }
+    .back-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-weight: 700; font-size: 0.85rem; margin-bottom: 10px; padding: 4px 0; display: inline-flex; align-items: center; gap: 4px; font-family: var(--font); }
     .back-btn:hover { color: var(--primary); transform: translateX(-3px); }
 
     /* ---------- DROP ZONE & INPUTS ---------- */
-    .drop-zone { border: 2.5px dashed var(--card-border); border-radius: var(--radius-md); padding: 36px 20px; text-align: center; cursor: pointer; transition: all var(--transition-smooth); background: var(--bg-soft); margin-bottom: 16px; position: relative; overflow: hidden; }
+    .drop-zone { border: 2.5px dashed var(--card-border); border-radius: var(--radius-md); padding: 16px 10px; text-align: center; cursor: pointer; transition: all var(--transition-smooth); background: var(--bg-soft); margin-bottom: 8px; position: relative; overflow: hidden; }
     .drop-zone:hover, .drop-zone.drag-over { border-color: var(--primary); background: var(--primary-soft); }
-    .drop-zone-icon { font-size: 2.8rem; margin-bottom: 8px; display: block; }
-    .drop-zone-title { font-size: 1.15rem; font-weight: 800; color: var(--ink); margin-bottom: 4px; }
-    .drop-zone-sub { font-size: 0.85rem; color: var(--muted); font-weight: 500; }
+    .drop-zone-icon { font-size: 2rem; margin-bottom: 4px; display: block; }
+    .drop-zone-title { font-size: 1rem; font-weight: 800; color: var(--ink); margin-bottom: 2px; }
+    .drop-zone-sub { font-size: 0.75rem; color: var(--muted); font-weight: 500; }
 
-    .file-list { margin: 16px 0; max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-    .file-item { display: flex; align-items: center; justify-content: space-between; background: var(--card-bg); border: 1.5px solid var(--card-border); padding: 12px 14px; border-radius: var(--radius-sm); animation: filePop 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.1) forwards; }
+    .file-list { margin: 8px 0; max-height: 18vh; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; scrollbar-width: none; }
+    .file-list::-webkit-scrollbar { display: none; }
+    .file-item { display: flex; align-items: center; justify-content: space-between; background: var(--card-bg); border: 1.5px solid var(--card-border); padding: 8px 12px; border-radius: var(--radius-sm); animation: filePop 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.1) forwards; }
     @keyframes filePop { from { opacity: 0; transform: scale(0.9) translateY(8px); } to { opacity: 1; transform: scale(1) translateY(0); } }
-    .file-item .file-info { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; }
-    .file-item .file-name { font-weight: 700; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink); }
-    .file-item .file-size { font-size: 0.75rem; color: var(--muted); font-weight: 500; }
-    .remove-btn { background: var(--coral-soft); color: var(--coral); border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-weight: 700; font-size: 1rem; }
-    .add-more-btn { background: transparent; border: 2px dashed var(--card-border); color: var(--muted); padding: 12px; width: 100%; border-radius: var(--radius-sm); cursor: pointer; font-weight: 700; font-size: 0.9rem; margin-bottom: 4px; font-family: var(--font); }
+    .file-item .file-info { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1; }
+    .file-item .file-name { font-weight: 700; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink); }
+    .file-item .file-size { font-size: 0.7rem; color: var(--muted); font-weight: 500; }
+    .remove-btn { background: var(--coral-soft); color: var(--coral); border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-weight: 700; font-size: 0.9rem; }
+    .add-more-btn { background: transparent; border: 2px dashed var(--card-border); color: var(--muted); padding: 8px; width: 100%; border-radius: var(--radius-sm); cursor: pointer; font-weight: 700; font-size: 0.85rem; margin-bottom: 4px; font-family: var(--font); }
 
-    input { width: 100%; padding: 16px 18px; margin: 10px 0; background: var(--bg-soft); border: 2px solid var(--card-border); border-radius: var(--radius-sm); font-size: 1rem; font-family: var(--font); font-weight: 600; box-sizing: border-box; text-align: center; outline: none; }
-    input:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 5px var(--primary-glow); }
+    input { width: 100%; padding: 10px 14px; margin: 5px 0; background: var(--bg-soft); border: 2px solid var(--card-border); border-radius: var(--radius-sm); font-size: 0.95rem; font-family: var(--font); font-weight: 600; box-sizing: border-box; text-align: center; outline: none; }
+    input:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 4px var(--primary-glow); }
 
-    .action-btn { background: var(--primary); color: white; border: none; padding: 18px 24px; width: 100%; border-radius: var(--radius-sm); font-size: 1.05rem; font-weight: 800; font-family: var(--font); cursor: pointer; margin-top: 14px; display: flex; justify-content: center; gap: 10px; align-items: center; box-shadow: 0 6px 20px var(--primary-glow); transition: all var(--transition-smooth); }
+    .action-btn { background: var(--primary); color: white; border: none; padding: 14px 20px; width: 100%; border-radius: var(--radius-sm); font-size: 0.95rem; font-weight: 800; font-family: var(--font); cursor: pointer; margin-top: 8px; display: flex; justify-content: center; gap: 8px; align-items: center; box-shadow: 0 6px 16px var(--primary-glow); transition: all var(--transition-smooth); }
     .action-btn:hover:not(:disabled) { background: #3550E0; transform: translateY(-2px); }
     .action-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-    .action-btn.danger-btn { background: var(--coral); box-shadow: 0 6px 20px rgba(255, 107, 107, 0.3); }
-    .action-btn.success-btn { background: var(--mint); box-shadow: 0 6px 20px rgba(45, 212, 191, 0.3); }
+    .action-btn.danger-btn { background: var(--coral); box-shadow: 0 6px 16px rgba(255, 107, 107, 0.3); }
+    .action-btn.success-btn { background: var(--mint); box-shadow: 0 6px 16px rgba(45, 212, 191, 0.3); }
 
     /* ---------- ACTIVE SESSION / QR ---------- */
-    .share-header { text-align: center; margin-bottom: 20px; }
-    .share-header h2 { font-size: 1.6rem; font-weight: 900; color: var(--ink); margin-bottom: 6px; }
-    .stats-row { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
-    .stat-pill { display: inline-flex; align-items: center; gap: 6px; background: var(--bg-soft); border: 1.5px solid var(--card-border); border-radius: 100px; padding: 8px 16px; font-weight: 700; font-size: 0.9rem; }
+    .share-header { text-align: center; margin-bottom: 12px; }
+    .share-header h2 { font-size: 1.4rem; font-weight: 900; color: var(--ink); margin-bottom: 4px; }
+    .stats-row { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+    .stat-pill { display: inline-flex; align-items: center; gap: 4px; background: var(--bg-soft); border: 1.5px solid var(--card-border); border-radius: 100px; padding: 6px 12px; font-weight: 700; font-size: 0.85rem; }
     .timer-red { color: var(--coral); font-variant-numeric: tabular-nums; font-weight: 800; }
-    .qr-placeholder { background: white; padding: 12px; border-radius: var(--radius-md); margin: 0 auto 16px; width: 170px; height: 170px; display: flex; justify-content: center; align-items: center; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06); border: 2px solid var(--card-border); }
-    .manual-entry { background: var(--bg-soft); border-radius: var(--radius-md); padding: 18px 16px; margin-bottom: 16px; text-align: center; }
-    .otp-display { font-size: 2.4rem; font-weight: 900; color: var(--primary); letter-spacing: 8px; text-align: center; margin: 4px 0; font-family: var(--font); }
+    .qr-placeholder { background: white; padding: 10px; border-radius: var(--radius-md); margin: 0 auto 10px; width: 140px; height: 140px; display: flex; justify-content: center; align-items: center; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06); border: 2px solid var(--card-border); }
+    .manual-entry { background: var(--bg-soft); border-radius: var(--radius-md); padding: 12px 14px; margin-bottom: 10px; text-align: center; }
+    .otp-display { font-size: 2rem; font-weight: 900; color: var(--primary); letter-spacing: 6px; text-align: center; margin: 2px 0; font-family: var(--font); }
 
     /* ---------- VAULT ---------- */
-    .vault-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-top: 16px; }
-    .vault-item { background: var(--card-bg); border: 1.5px solid var(--card-border); border-radius: var(--radius-sm); padding: 18px 12px; text-align: center; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px; transition: all var(--transition-smooth); }
-    .vault-item:hover { transform: translateY(-5px); border-color: var(--primary); }
+    .vault-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 10px; max-height: 35vh; overflow-y: auto; scrollbar-width: none; }
+    .vault-grid::-webkit-scrollbar { display: none; }
+    .vault-item { background: var(--card-bg); border: 1.5px solid var(--card-border); border-radius: var(--radius-sm); padding: 14px 10px; text-align: center; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: all var(--transition-smooth); }
+    .vault-item:hover { transform: translateY(-4px); border-color: var(--primary); }
 
     /* ---------- PREVIEW MODAL ---------- */
     .preview-modal { position: fixed; inset: 0; background: rgba(26, 26, 44, 0.96); z-index: 1000; display: none; flex-direction: column; padding: 16px; box-sizing: border-box; backdrop-filter: blur(20px); }
@@ -212,25 +216,24 @@
     .preview-actions button.primary { background: var(--primary); border: none; }
 
     /* ---------- TRANSFER ANIMATION ---------- */
-    .transfer-animation { width: 100%; margin: 16px 0 8px; opacity: 0; transform: translateY(10px); transition: opacity 0.5s ease, transform 0.5s ease; pointer-events: none; }
+    .transfer-animation { width: 100%; margin: 10px 0 6px; opacity: 0; transform: translateY(10px); transition: opacity 0.5s ease, transform 0.5s ease; pointer-events: none; }
     .transfer-animation.active { opacity: 1; transform: translateY(0); }
-    .transfer-scene { display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--bg-soft); border-radius: var(--radius-md); padding: 18px 12px; border: 1.5px solid var(--card-border); position: relative; overflow: hidden; }
-    .transfer-device { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 2rem; }
+    .transfer-scene { display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--bg-soft); border-radius: var(--radius-md); padding: 12px 10px; border: 1.5px solid var(--card-border); position: relative; overflow: hidden; }
+    .transfer-device { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 1.8rem; }
     .transfer-device span { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; color: var(--muted); }
-    .transfer-path-scene { flex: 1; max-width: 180px; height: 60px; position: relative; display: flex; align-items: center; justify-content: center; }
-    .transfer-text { position: absolute; top: 4px; left: 50%; transform: translateX(-50%); font-size: 0.55rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--primary); }
+    .transfer-path-scene { flex: 1; max-width: 160px; height: 40px; position: relative; display: flex; align-items: center; justify-content: center; }
+    .transfer-text { position: absolute; top: 0px; left: 50%; transform: translateX(-50%); font-size: 0.5rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--primary); }
 
     .fullscreen-drop { position: fixed; inset: 0; background: rgba(253, 249, 240, 0.92); backdrop-filter: blur(16px); z-index: 999; display: none; justify-content: center; align-items: center; border: 6px dashed var(--primary); }
     .fullscreen-drop.active { display: flex; }
 
     /* ---------- SEO CONTENT & FOOTER ---------- */
-    .seo-text-block { max-width: 580px; margin: 32px auto 0; text-align: center; color: var(--muted); font-size: 0.85rem; line-height: 1.6; padding: 0 20px; }
-    .seo-text-block h2 { font-size: 1rem; color: var(--ink); margin-bottom: 8px; font-weight: 800; }
-    .site-footer { margin-top: 24px; text-align: center; display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; z-index: 2; position: relative; }
-    .site-footer a { color: var(--muted); text-decoration: none; font-size: 0.85rem; font-weight: 600; transition: color var(--transition-fast); }
+    .seo-text-block { display: none; } /* HIDDEN VISUALLY TO PREVENT SCROLL */
+    
+    .site-footer { position: absolute; bottom: 10px; left: 0; width: 100%; text-align: center; display: flex; gap: 16px; justify-content: center; z-index: 2; padding: 0 10px; }
+    .site-footer a { color: var(--muted); text-decoration: none; font-size: 0.8rem; font-weight: 600; transition: color var(--transition-fast); }
     .site-footer a:hover { color: var(--primary); }
 
-    @media (max-width: 480px) { .app-container { padding: 16px 14px 32px; justify-content: flex-start; padding-top: 28px; } .glass-panel { padding: 24px 18px; border-radius: 24px; } .hero-title { font-size: 1.85rem; } }
   </style>
 </head>
 <body>
@@ -271,7 +274,7 @@
       <span class="logo-dot" aria-hidden="true">.</span>
     </div>
 
-    <!-- LANDING VIEW (Sits directly on the animated background without a container wrapper) -->
+    <!-- LANDING VIEW -->
     <div id="view-landing" class="view active landing-wrapper" role="main">
       <div class="hero-section">
         <h1 class="hero-title">Send files.<br><span class="highlight">Like magic.</span></h1>
@@ -281,7 +284,7 @@
           <span>➔</span>
           <span class="step-badge">2. Set PIN</span>
           <span>➔</span>
-          <span class="step-badge">3. Open Quickshares.site to Download</span>
+          <span class="step-badge">3. Download</span>
         </div>
       </div>
 
@@ -343,18 +346,17 @@
     <div id="view-active" class="view glass-panel">
       <div class="share-header">
         <h2>Your files are ready ✦</h2>
-        <p>Scan the QR code or open Quickshares.site, enter the PIN & OTP below and download.</p>
+        <p style="font-size: 0.85rem;">Scan QR or enter PIN & OTP.</p>
       </div>
       <div class="stats-row">
         <div class="stat-pill"><span class="stat-icon">⏱️</span><span id="timer" class="timer-red">05:00</span></div>
         <div class="stat-pill"><span class="stat-icon">📥</span><span><span id="download-count">0</span> / <span id="download-max">2</span></span></div>
       </div>
-      <div style="text-align:center; margin-bottom:20px;">
+      <div style="text-align:center; margin-bottom:10px;">
         <div id="qrcode" class="qr-placeholder"></div>
       </div>
       <div class="manual-entry">
-        <div style="font-size:0.8rem; color:var(--muted); font-weight:600; margin-bottom:8px;">or enter this code manually</div>
-        <div style="text-align:center;"><span style="font-size:0.95rem; font-weight:600;">PIN: <strong id="display-pin" style="font-size:1.2rem; color:var(--primary); letter-spacing:2px;">----</strong></span></div>
+        <div style="text-align:center;"><span style="font-size:0.85rem; font-weight:600;">PIN: <strong id="display-pin" style="font-size:1.1rem; color:var(--primary); letter-spacing:2px;">----</strong></span></div>
         <div class="otp-display" id="display-otp">----</div>
       </div>
       <button class="action-btn danger-btn" onclick="location.reload()">end session</button>
@@ -363,9 +365,9 @@
     <!-- RECEIVE VIEW -->
     <div id="view-receive" class="view glass-panel">
       <button class="back-btn" onclick="navTo('view-landing')">← back</button>
-      <div class="receive-header">
-        <h2>Catch your files ✦</h2>
-        <p>Enter the PIN and OTP to bring your files over.</p>
+      <div class="receive-header" style="text-align: center; margin-bottom: 12px;">
+        <h2 style="font-size: 1.5rem; font-weight: 900;">Catch files ✦</h2>
+        <p style="font-size: 0.85rem; color: var(--muted);">Enter the PIN and OTP.</p>
       </div>
       <input type="text" id="receiver-pin" maxlength="4" placeholder="4-digit PIN" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
       <input type="text" id="receiver-otp" maxlength="4" placeholder="4-digit OTP" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
@@ -378,9 +380,8 @@
     <!-- VAULT -->
     <div id="view-vault" class="view glass-panel">
       <button class="back-btn" onclick="navTo('view-landing')">← end session (home)</button>
-      <div style="margin-bottom:16px;">
-        <h2 style="font-size:1.5rem; font-weight:900;">File Vault</h2>
-        <p style="font-size:0.85rem; color:var(--muted); font-weight:500;">Select a file to preview or download.</p>
+      <div style="margin-bottom:10px;">
+        <h2 style="font-size:1.4rem; font-weight:900;">File Vault</h2>
       </div>
       <button id="download-all-btn" class="action-btn success-btn" onclick="downloadAllFiles()">
         <span id="dl-icon">📦</span>
@@ -389,7 +390,7 @@
       <div id="vault-grid" class="vault-grid" role="list"></div>
     </div>
 
-    <!-- SEO / CRAWLABLE TEXT -->
+    <!-- SEO / CRAWLABLE TEXT (Hidden to prevent scrolling) -->
     <div class="seo-text-block">
       <h2>Secure, 5-Minute File Sharing</h2>
       <p>Quickshares.online is a frictionless, temporary file sharing platform designed for speed and privacy. Upload files to generate a secure PIN and OTP. Scan the auto-generated QR code or enter the credentials on any device to instantly receive your files. All transfers are permanently destroyed after 5 minutes or once the download limit is reached. No accounts or software required.</p>
@@ -437,7 +438,7 @@
         document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active'); });
         var target = document.getElementById(viewId);
         if (target) target.classList.add('active');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // No longer scrolling since the viewport is fixed
       };
 
       var fullscreenDrop = document.getElementById('fullscreen-drop');
