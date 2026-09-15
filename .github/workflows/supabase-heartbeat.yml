@@ -1,0 +1,43 @@
+name: Supabase Heartbeat
+
+on:
+  schedule:
+    - cron: "30 0 * * *"
+
+  workflow_dispatch:
+
+jobs:
+  heartbeat:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Send heartbeat to Supabase
+
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+
+        run: |
+
+          echo "Sending heartbeat to Supabase..."
+
+          RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -X POST \
+            "${SUPABASE_URL}/rest/v1/rpc/github_heartbeat" \
+            -H "apikey: ${SUPABASE_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_KEY}" \
+            -H "Content-Type: application/json")
+
+          echo "Supabase response:"
+          echo "$RESPONSE"
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n 1)
+
+          if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
+            echo "Heartbeat failed."
+            exit 1
+          fi
+
+          echo "Heartbeat successful!"
