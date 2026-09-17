@@ -5,6 +5,19 @@ import { supabaseUrl, supabaseKey } from './config.js';
 // Initialize Supabase
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+// --- SILENT ANALYTICS TRACKER ---
+// This function logs events to the database without blocking the UI
+async function logEvent(eventType) {
+    try {
+        await supabase.from('analytics').insert([{ event_type: eventType }]);
+    } catch (error) {
+        console.error('Analytics log failed (ignored):', error);
+    }
+}
+
+// Log initial page view
+logEvent('page_view');
+
 // --- DETECT QR PARAMETERS ---
 const urlParams = new URLSearchParams(window.location.search);
 const qrPin = urlParams.get('pin');
@@ -20,6 +33,10 @@ window.navTo = function(viewId, pushHistory = true) {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     const target = document.getElementById(viewId);
     if (target) target.classList.add('active');
+    
+    // Log navigation clicks for analytics
+    if (viewId === 'view-send') logEvent('click_send');
+    if (viewId === 'view-receive') logEvent('click_receive');
     
     // =========================================================
     // FIX: COMPLETELY CLEAR ALL FORMS WHEN GOING TO HOME PAGE
@@ -153,6 +170,9 @@ uploadBtn.addEventListener('click', async () => {
 
         if (dbError) throw dbError;
 
+        // Log successful upload for analytics
+        logEvent('upload_success');
+
         document.getElementById('upload-text').innerText = 'SENT ✦';
         
         setTimeout(() => {
@@ -265,6 +285,9 @@ async function processVerification(pin, otp) {
             }
         }
         
+        // Log successful download access for analytics
+        logEvent('download_success');
+
         renderVault();
         window.navTo('view-vault');
         
