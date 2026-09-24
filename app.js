@@ -2,6 +2,33 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 import { supabaseUrl, supabaseKey } from './config.js';
 
+// =========================================================
+// --- SEO ROUTING FIX FOR GOOGLE SEARCH CONSOLE ---
+// =========================================================
+function updateSEOForRoute() {
+    const currentPath = window.location.pathname.toLowerCase();
+    
+    // Block indexing for /Inbox or other internal app states
+    if (currentPath.includes('/inbox')) {
+        let metaRobots = document.querySelector('meta[name="robots"]');
+        if (!metaRobots) {
+            metaRobots = document.createElement('meta');
+            metaRobots.name = 'robots';
+            document.head.appendChild(metaRobots);
+        }
+        metaRobots.content = 'noindex, nofollow';
+    } else {
+        // Allow indexing for the public homepage
+        let metaRobots = document.querySelector('meta[name="robots"]');
+        if (metaRobots) {
+            metaRobots.content = 'index, follow';
+        }
+    }
+}
+updateSEOForRoute(); // Run on initial load
+// =========================================================
+
+
 // Initialize Supabase
 const supabase = createClient(supabaseUrl, supabaseKey);
 
@@ -65,11 +92,19 @@ window.navTo = function(viewId, pushHistory = true) {
     if (pushHistory) {
         let url = viewId === 'view-landing' ? window.location.pathname : window.location.pathname + '#' + viewId;
         history.pushState({ view: viewId }, '', url);
+        updateSEOForRoute(); // Trigger SEO fix on client-side navigation
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
+const originalPushState = history.pushState;
+history.pushState = function() {
+    originalPushState.apply(this, arguments);
+    updateSEOForRoute();
+};
+
 window.addEventListener('popstate', (e) => {
+    updateSEOForRoute();
     const modal = document.getElementById('preview-modal');
     if (modal && modal.classList.contains('active')) {
         window.closePreview(false);
