@@ -18,8 +18,14 @@
   <meta name="description" content="Quickshares.online is a free, fast, and magical temporary file transfer service. Share files instantly across devices using a simple PIN and OTP.">
   <meta name="keywords" content="quick file share online, file transfer, send files, share files, secure file sharing, fast file drop">
   
-  <!-- Canonical Tag -->
+  <!-- Canonical Tag (Fixes Google Search Console duplicate indexing error) -->
   <link rel="canonical" href="https://quickshares.online/" />
+  
+  <!-- Open Graph / Social Sharing -->
+  <meta property="og:title" content="QuickShares - Secure & Fast File Sharing Online">
+  <meta property="og:description" content="Upload, share, and manage your files instantly with ease.">
+  <meta property="og:url" content="https://quickshares.online/">
+  <meta property="og:type" content="website">
   
   <!-- Favicon -->
   <link rel="icon" type="image/jpeg" href="https://i.ibb.co/Rpb7JdYS/gemini-svg-1.jpg">
@@ -47,16 +53,6 @@
   }
   </script>
 
-  <!-- INSTANT CHECK: If QR code scanned, bypass animation immediately before first paint -->
-  <script>
-    (function() {
-      var p = new URLSearchParams(window.location.search);
-      if (p.get('pin') && p.get('otp')) {
-        document.documentElement.classList.add('qr-scanned-mode');
-      }
-    })();
-  </script>
-
   <style>
     /* ---------- RESET & VARIABLES ---------- */
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -67,10 +63,6 @@
 
     /* ---------- PREFERS REDUCED MOTION ---------- */
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; } .floating-doodle { display: none; } .moving-border-svg rect { animation: none; } }
-
-    /* IF QR SCANNED: Hide intro completely & make app container visible instantly */
-    .qr-scanned-mode #intro-animation { display: none !important; }
-    .qr-scanned-mode .app-container { opacity: 1 !important; transform: none !important; }
 
     /* ---------- DOODLE BACKGROUND ---------- */
     .doodle-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
@@ -90,26 +82,8 @@
     .blob-3 { width: 350px; height: 350px; background: var(--violet); top: 40%; right: 20%; animation: blobFloat 22s ease-in-out infinite; }
     @keyframes blobFloat { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(40px, -30px) scale(1.1); } }
 
-    /* ---------- INTRO OVERLAY ---------- */
-    #intro-animation { position: fixed; inset: 0; background: var(--bg-cream); z-index: 3000; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.6s ease, transform 0.6s ease; }
-    .intro-sequence { display: flex; align-items: center; gap: 16px; font-size: 64px; margin-bottom: 24px; }
-    .intro-item { opacity: 0; transform: scale(0.3) rotate(-8deg); display: inline-block; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.06)); }
-    .intro-doc { animation: popIn 0.5s forwards 0.15s; }
-    .intro-lock { animation: popIn 0.5s forwards 0.65s; color: var(--mint); }
-    .intro-phone { animation: popIn 0.5s forwards 1.15s; }
-    .intro-arrow { opacity: 0; font-size: 28px; color: var(--primary); font-weight: 300; }
-    .arrow-1 { animation: slideIn 0.45s forwards 0.4s; }
-    .arrow-2 { animation: slideIn 0.45s forwards 0.9s; }
-    @keyframes popIn { to { opacity: 1; transform: scale(1) rotate(0deg); } }
-    @keyframes slideIn { from { opacity: 0; transform: translateX(-18px); } to { opacity: 1; transform: translateX(0); } }
-    .intro-text { font-size: 1.5rem; font-weight: 800; color: var(--ink); opacity: 0; animation: fadeInUp 0.6s forwards 1.6s; letter-spacing: -0.02em; text-align: center; line-height: 1.3; padding: 0 20px; }
-    .intro-text span { display: block; font-size: 1rem; font-weight: 500; color: var(--muted); margin-top: 6px; letter-spacing: 0; }
-    @keyframes fadeInUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
-    .intro-fade-out { opacity: 0; transform: scale(1.06); pointer-events: none; }
-
-    /* ---------- APP CONTAINER - MODIFIED FOR NO SCROLL ---------- */
-    .app-container { position: relative; z-index: 2; opacity: 0; transform: translateY(30px); transition: opacity 0.8s cubic-bezier(0.2, 0.9, 0.3, 1), transform 0.8s cubic-bezier(0.2, 0.9, 0.3, 1); display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; width: 100vw; padding: 10px; overflow: hidden; box-sizing: border-box; }
-    .app-container.visible { opacity: 1; transform: translateY(0); }
+    /* ---------- APP CONTAINER - MODIFIED FOR INSTANT LOAD ---------- */
+    .app-container { position: relative; z-index: 2; opacity: 1; transform: translateY(0); display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; width: 100vw; padding: 10px; overflow: hidden; box-sizing: border-box; }
 
     .logo { font-size: 1.5rem; font-weight: 900; letter-spacing: -0.04em; color: var(--ink); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; user-select: none; }
     .logo-icon { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: var(--primary); border-radius: 10px; color: white; font-size: 1.1rem; transform: rotate(-4deg); transition: transform var(--transition-fast); box-shadow: 0 4px 12px var(--primary-glow); }
@@ -243,21 +217,6 @@
     <div class="floating-doodle">☁️</div><div class="floating-doodle">✦</div><div class="floating-doodle">📦</div>
   </div>
   <div class="blob blob-1" aria-hidden="true"></div><div class="blob blob-2" aria-hidden="true"></div><div class="blob blob-3" aria-hidden="true"></div>
-
-  <!-- INTRO ANIMATION -->
-  <div id="intro-animation" role="presentation">
-    <div class="intro-sequence">
-      <span class="intro-item intro-doc">📄</span>
-      <span class="intro-arrow arrow-1">→</span>
-      <span class="intro-item intro-lock">🔒</span>
-      <span class="intro-arrow arrow-2">→</span>
-      <span class="intro-item intro-phone">📱</span>
-    </div>
-    <div class="intro-text">
-      send files like magic
-      <span>pick. share. done.</span>
-    </div>
-  </div>
 
   <div id="fullscreen-drop" class="fullscreen-drop" aria-hidden="true">
     <div style="text-align:center;">
@@ -421,26 +380,14 @@
 
   <script>
     (function() {
-      // NORMAL INTRO SCRIPT: Skip only if NOT in QR-scanned mode
-      var intro = document.getElementById('intro-animation');
-      var app = document.getElementById('app-container');
-      var isQR = document.documentElement.classList.contains('qr-scanned-mode');
-
-      if (intro && app && !isQR) {
-        setTimeout(function() {
-          intro.classList.add('intro-fade-out');
-          app.classList.add('visible');
-          setTimeout(function() { intro.style.display = 'none'; }, 650);
-        }, 2600);
-      }
-
+      // Navigation handler
       window.navTo = function(viewId) {
         document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active'); });
         var target = document.getElementById(viewId);
         if (target) target.classList.add('active');
-        // No longer scrolling since the viewport is fixed
       };
 
+      // Drag and Drop Logic
       var fullscreenDrop = document.getElementById('fullscreen-drop');
       var dragCounter = 0;
       document.addEventListener('dragenter', function(e) { e.preventDefault(); dragCounter++; if (dragCounter === 1 && fullscreenDrop) fullscreenDrop.classList.add('active'); });
