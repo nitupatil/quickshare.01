@@ -305,15 +305,29 @@
     <div id="view-active" class="view glass-panel">
       <div class="share-header">
         <h2>Your files are ready ✦</h2>
-        <p style="font-size: 0.85rem;">Scan QR or enter PIN & OTP.</p>
       </div>
       <div class="stats-row">
         <div class="stat-pill"><span class="stat-icon">⏱️</span><span id="timer" class="timer-red">05:00</span></div>
         <div class="stat-pill"><span class="stat-icon">📥</span><span><span id="download-count">0</span> / <span id="download-max">2</span></span></div>
       </div>
-      <div style="text-align:center; margin-bottom:10px;">
+      
+      <!-- NEW CLEAR INSTRUCTIONS: QR Code Section -->
+      <div style="text-align: center; margin-top: 10px; margin-bottom: 6px;">
+          <span style="font-size: 0.85rem; font-weight: 800; color: var(--ink);">📱 Download files by scanning this QR:</span>
+      </div>
+
+      <div style="text-align:center; margin-bottom:12px;">
         <div id="qrcode" class="qr-placeholder"></div>
       </div>
+      
+      <!-- NEW CLEAR INSTRUCTIONS: Manual Entry Section -->
+      <div style="text-align: center; margin-bottom: 8px;">
+          <span style="font-size: 0.8rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px;">— OR —</span><br>
+          <span style="font-size: 0.85rem; font-weight: 600; color: var(--ink-soft); line-height: 1.4;">
+              Open <strong style="color: var(--primary);">quickshares.online</strong>, click <strong>Receive</strong> and enter:
+          </span>
+      </div>
+
       <div class="manual-entry">
         <div style="text-align:center;"><span style="font-size:0.85rem; font-weight:600;">PIN: <strong id="display-pin" style="font-size:1.1rem; color:var(--primary); letter-spacing:2px;">----</strong></span></div>
         <div class="otp-display" id="display-otp">----</div>
