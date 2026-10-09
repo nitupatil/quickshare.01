@@ -8,23 +8,25 @@
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
 
-  gtag('config', 'G-57JBSHMW9Y');
+  // Never send share PIN/OTP query parameters in the GA4 page URL.
+  gtag('config', 'G-57JBSHMW9Y', { page_location: location.origin + location.pathname, page_path: location.pathname });
 </script>
   <meta charset="UTF-8">
+  <meta name="theme-color" content="#FDF9F0">
   <!-- Accessibility Fix: Allow users to zoom by removing user-scalable=no -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <!-- SEO Optimization -->
-  <title>Quickshares.online | Fast & Secure Quick File Share Online</title>
-  <meta name="description" content="Quickshares.online is a free, fast, and magical temporary file transfer service. Share files instantly across devices using a simple PIN and OTP.">
+  <title>Share Files Online Free with QR Code & PIN | Quickshares</title>
+  <meta name="description" content="Share files online for free without signing up. Transfer up to 50 MB between your phone and laptop using a QR code or PIN and OTP. Links expire after 5 minutes.">
   <meta name="keywords" content="quick file share online, file transfer, send files, share files, secure file sharing, fast file drop">
   
   <!-- Canonical Tag (Fixes Google Search Console duplicate indexing error) -->
   <link rel="canonical" href="https://quickshares.online/" />
   
   <!-- Open Graph / Social Sharing -->
-  <meta property="og:title" content="QuickShares - Secure & Fast File Sharing Online">
-  <meta property="og:description" content="Upload, share, and manage your files instantly with ease.">
+  <meta property="og:title" content="Share Files Online Free | Quickshares QR & PIN Transfers">
+  <meta property="og:description" content="Move files between devices in a few steps. No account needed: send with a temporary PIN, OTP and QR code.">
   <meta property="og:url" content="https://quickshares.online/">
   <meta property="og:type" content="website">
   
@@ -62,7 +64,7 @@
     :root { --bg-cream: #FDF9F0; --bg-soft: #F6F2EA; --ink: #1A1A2C; --ink-soft: #3D3D5C; --muted: #7C7C96; --card-bg: #FFFFFF; --card-border: #E8E4DC; --primary: #3F5EFF; --primary-glow: #3F5EFF40; --primary-soft: #EEF1FF; --violet: #8B5CF6; --coral: #FF6B6B; --coral-soft: #FFE8E8; --mint: #2DD4BF; --mint-soft: #E0F7F3; --amber: #F59E0B; --amber-soft: #FEF3C7; --radius-lg: 32px; --radius-md: 20px; --radius-sm: 14px; --shadow-card: 0 12px 32px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.02); --shadow-hover: 0 20px 40px rgba(63, 94, 255, 0.12); --font: 'Manrope', -apple-system, system-ui, sans-serif; --transition-fast: 180ms cubic-bezier(0.2, 0, 0, 1); --transition-smooth: 400ms cubic-bezier(0.2, 0, 0, 1); --transition-spring: 600ms cubic-bezier(0.2, 0.9, 0.3, 1.1); }
     
     /* MODIFIED FOR NO SCROLL */
-    html, body { height: 100vh; width: 100vw; overflow: hidden; font-family: var(--font); background: var(--bg-cream); color: var(--ink); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; touch-action: none; }
+    html, body { min-height: 100%; width: 100%; overflow-x: hidden; overflow-y: auto; font-family: var(--font); background: var(--bg-cream); color: var(--ink); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
 
     /* ---------- PREFERS REDUCED MOTION ---------- */
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; } .floating-doodle { display: none; } .moving-border-svg rect { animation: none; } }
@@ -205,7 +207,7 @@
     .fullscreen-drop.active { display: flex; }
 
     /* ---------- SEO CONTENT & FOOTER ---------- */
-    .seo-text-block { display: none; } /* HIDDEN VISUALLY TO PREVENT SCROLL */
+    .seo-text-block { display: none; } /* Visible on the public homepage only. */
     
     .site-footer { position: absolute; bottom: 10px; left: 0; width: 100%; text-align: center; display: flex; flex-wrap: wrap; gap: 6px 12px; justify-content: center; z-index: 2; padding: 0 10px; }
     
@@ -220,9 +222,141 @@
     }
     .site-footer a:hover { color: var(--primary); }
 
+
+    /* ---------- SEARCH-FRIENDLY LANDING PAGE ---------- */
+    body.landing-mode .app-container {
+      height: auto; min-height: 100vh; min-height: 100svh;
+      width: 100%; overflow: visible; justify-content: flex-start;
+      padding: 20px 20px 32px;
+    }
+    body.landing-mode .logo { margin: 0 auto 20px; position: relative; z-index: 3; }
+    body.landing-mode .landing-wrapper,
+    body.landing-mode .view.active.landing-wrapper {
+      width: 100%; max-width: 1100px; max-height: none; overflow: visible;
+    }
+    body.landing-mode .view.active.landing-wrapper { animation: none; }
+    .home-hero {
+      position: relative; overflow: hidden; isolation: isolate; display: grid;
+      grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
+      align-items: center; gap: 34px; padding: clamp(28px,4.5vw,62px);
+      background: rgba(255,255,255,.94); border: 1px solid var(--card-border);
+      border-radius: 32px; box-shadow: 0 22px 70px rgba(33,32,70,.07);
+    }
+    .home-hero::before {
+      content: ''; position: absolute; right: -130px; top: -180px; z-index: -1;
+      width: 530px; height: 530px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(139,92,246,.13), rgba(63,94,255,0) 70%);
+    }
+    .home-hero .hero-section { text-align: left; margin: 0; }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 7px; font-size: .73rem;
+      font-weight: 900; letter-spacing: .05em; text-transform: uppercase;
+      background: var(--primary-soft); color: #304aca; padding: 8px 12px;
+      border: 1px solid #dce3ff; border-radius: 100px; margin-bottom: 18px;
+    }
+    .home-hero .hero-title {
+      font-size: clamp(2.1rem,4.3vw,3.65rem); line-height: 1.07;
+      letter-spacing: -.055em; margin-bottom: 18px; text-wrap: balance;
+    }
+    .home-hero .hero-sub {
+      max-width: 520px; font-size: clamp(.97rem,1.35vw,1.07rem);
+      line-height: 1.7; font-weight: 550; color: #595975;
+    }
+    .home-hero .quick-steps-bar { justify-content: flex-start; margin: 20px 0 0; gap: 8px; }
+    .home-hero .step-badge { background: #fff; font-size: .73rem; padding: 8px 12px; }
+    .hero-preview {
+      border: 1px solid #e6e6f4; border-radius: 26px; background: linear-gradient(160deg,#f6f7ff,#fff 67%);
+      box-shadow: 0 20px 45px rgba(63,94,255,.09); padding: 20px;
+      transform: rotate(1deg); max-width: 410px; width: 100%; margin: 0 auto;
+    }
+    .preview-top { display: flex; align-items: center; gap: 9px; font-size: .81rem; font-weight: 900; color: var(--ink); }
+    .preview-mark { background: var(--primary); color: #fff; border-radius: 9px; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; }
+    .preview-status { margin-left: auto; color: #187c65; font-size: .7rem; background: #def8ec; padding: 6px 9px; border-radius: 99px; }
+    .preview-transfer { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 34px 0 20px; }
+    .preview-device { width: 80px; height: 80px; border-radius: 22px; background: #fff; border: 1px solid #e7e8f6; box-shadow: 0 8px 18px #e9eafd; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; }
+    .preview-arrow { color: var(--primary); font-weight: 900; letter-spacing: .15em; font-size: 1.1rem; }
+    .preview-file { display: flex; align-items: center; gap: 12px; background: #fff; border: 1px solid #ececf7; border-radius: 16px; padding: 12px; box-shadow: 0 8px 20px rgba(30,40,100,.04); }
+    .preview-file-icon { font-size: 1.6rem; background: #f4f3ff; padding: 8px; border-radius: 10px; }
+    .preview-file-copy { display: flex; flex-direction: column; gap: 3px; font-size: .83rem; flex: 1; }
+    .preview-file-copy small { color: var(--muted); font-weight: 600; font-size: .72rem; }
+    .preview-check { font-size: 1.1rem; font-weight: 900; color: #1c996f; }
+    .preview-tip { margin-top: 14px; text-align: center; font-size: .72rem; font-weight: 800; color: var(--muted); }
+    .action-choice-label { margin: 23px 0 12px; text-align: center; color: var(--ink-soft); font-size: .83rem; font-weight: 800; }
+    body.landing-mode .split-landing { gap: 14px; }
+    body.landing-mode .split-btn {
+      min-height: 106px; flex-direction: row; gap: 14px; justify-content: flex-start;
+      text-align: left; padding: 19px 22px; font-family: var(--font);
+      font-size: 1.06rem; font-weight: 900; background: #fff;
+      border: 1.5px solid var(--card-border); box-shadow: 0 10px 30px rgba(30,30,65,.05);
+    }
+    body.landing-mode .split-btn[data-action="send"] { background: var(--primary); color: #fff; border-color: var(--primary); }
+    body.landing-mode .split-btn .btn-doodle { width: 52px; height: 52px; margin: 0; border-radius: 15px; font-size: 1.45rem; }
+    body.landing-mode .split-btn[data-action="send"] .btn-doodle { background: rgba(255,255,255,.18); color: white; }
+    body.landing-mode .split-btn .btn-copy { display: flex; flex-direction: column; gap: 6px; }
+    body.landing-mode .split-btn .btn-caption { font-size: .78rem; font-weight: 600; color: #666582; }
+    body.landing-mode .split-btn[data-action="send"] .btn-caption { color: rgba(255,255,255,.85); }
+    body.landing-mode .split-btn:focus-visible, .home-cta:focus-visible, .site-footer a:focus-visible {
+      outline: 3px solid var(--amber); outline-offset: 3px;
+    }
+    body.landing-mode .seo-text-block { display: block; width: min(1100px,100%); margin: 46px auto 0; }
+    .trust-row { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 44px; }
+    .trust-pill { display: inline-flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--card-border); padding: 10px 16px; border-radius: 100px; font-size: .78rem; font-weight: 800; color: #43435e; }
+    .seo-section { margin: 0 0 52px; }
+    .section-kicker { font-size: .74rem; letter-spacing: .12em; text-transform: uppercase; font-weight: 900; color: var(--primary); margin-bottom: 9px; }
+    .seo-section h2 { font-size: clamp(1.6rem,3.4vw,2.25rem); line-height: 1.2; letter-spacing: -.045em; margin: 0 0 12px; text-wrap: balance; }
+    .section-lead { max-width: 700px; line-height: 1.8; color: #656581; font-size: .94rem; margin-bottom: 24px; }
+    .guide-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; }
+    .guide-card { background: #fff; border: 1px solid var(--card-border); border-radius: 22px; padding: 22px; box-shadow: var(--shadow-card); }
+    .guide-icon { width: 43px; height: 43px; border-radius: 13px; background: var(--primary-soft); display: flex; align-items: center; justify-content: center; font-size: 1.25rem; margin-bottom: 14px; }
+    .guide-card h3 { font-size: 1rem; margin-bottom: 9px; font-weight: 900; }
+    .guide-card p { font-size: .84rem; line-height: 1.75; color: #656581; }
+    .use-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
+    .use-card { display: flex; gap: 15px; background: rgba(255,255,255,.9); border: 1px solid var(--card-border); border-radius: 21px; padding: 22px; }
+    .use-card .guide-icon { flex: 0 0 auto; margin: 0; }
+    .use-card h3 { font-size: 1rem; margin-bottom: 7px; }
+    .use-card p { font-size: .85rem; line-height: 1.72; color: #656581; }
+    .faq-list { display: grid; gap: 11px; }
+    .faq-list details { background: #fff; border: 1px solid var(--card-border); border-radius: 17px; padding: 17px 20px; }
+    .faq-list summary { cursor: pointer; font-size: .93rem; font-weight: 850; list-style-position: inside; }
+    .faq-list details p { padding: 12px 3px 0; font-size: .86rem; line-height: 1.8; color: #656581; }
+    .closing-panel { background: #222449; border-radius: 27px; text-align: center; padding: 36px 22px; margin-bottom: 12px; color: #fff; }
+    .closing-panel h2 { color: white; margin-bottom: 9px; }
+    .closing-panel p { color: #e3e5ff; margin-bottom: 18px; font-size: .91rem; }
+    .home-cta { background: #fff; color: #293fce; font: 900 .94rem var(--font); border: 0; border-radius: 13px; padding: 13px 22px; cursor: pointer; }
+    body.landing-mode .site-footer { position: relative; bottom: auto; left: auto; width: 100%; max-width: 1100px; gap: 9px 20px; margin: 24px auto 0; padding: 14px; }
+    body.landing-mode .site-footer a { font-size: .79rem; font-weight: 750; }
+    body:not(.landing-mode) .site-footer { display: none; }
+    @media (max-width: 750px) {
+      body.landing-mode .app-container { padding: 14px 14px 24px; }
+      body.landing-mode .logo { margin-bottom: 15px; }
+      .home-hero { grid-template-columns: 1fr; gap: 22px; padding: 29px 22px; border-radius: 25px; }
+      .home-hero .hero-section { text-align: center; }
+      .home-hero .hero-sub { margin: 0 auto; }
+      .home-hero .quick-steps-bar { justify-content: center; }
+      .hero-preview { padding: 15px; max-width: 370px; transform: none; }
+      .preview-transfer { padding: 17px 0 14px; }
+      .preview-device { width: 62px; height: 62px; font-size: 1.7rem; }
+      .guide-grid { grid-template-columns: 1fr; }
+      .use-grid { grid-template-columns: 1fr; }
+      .seo-section { margin-bottom: 39px; }
+      body.landing-mode .seo-text-block { margin-top: 28px; }
+      .trust-row { margin-bottom: 32px; }
+    }
+    @media (max-width: 480px) {
+      .home-hero { padding: 25px 17px; }
+      .home-hero .hero-title { font-size: clamp(1.95rem,8.5vw,2.65rem); }
+      .home-hero .step-badge { padding: 6px 9px; font-size: .65rem; }
+      body.landing-mode .split-landing { gap: 9px; }
+      body.landing-mode .split-btn { min-width: 0; padding: 13px 9px; gap: 7px; flex-direction: column; align-items: center; text-align: center; min-height: 125px; font-size: .84rem; }
+      body.landing-mode .split-btn .btn-doodle { width: 39px; height: 39px; font-size: 1.2rem; }
+      body.landing-mode .split-btn .btn-caption { font-size: .68rem; line-height: 1.3; }
+      .trust-row { gap: 7px; }
+      .trust-pill { padding: 9px 10px; font-size: .68rem; }
+      .guide-card, .use-card { padding: 18px; }
+    }
   </style>
 </head>
-<body>
+<body class="landing-mode">
 
   <div class="doodle-bg" aria-hidden="true">
     <div class="floating-doodle">✦</div><div class="floating-doodle">📄</div><div class="floating-doodle">✈️</div>
@@ -245,42 +379,49 @@
       <span class="logo-dot" aria-hidden="true">.</span>
     </div>
 
-    <!-- LANDING VIEW -->
-    <div id="view-landing" class="view active landing-wrapper" role="main">
-      <div class="hero-section">
-        <h1 class="hero-title">Send files.<br><span class="highlight">Like magic.</span></h1>
-        <p class="hero-sub">Upload files, set a temporary PIN, and download them on any other device instantly.</p>
-        <div class="quick-steps-bar">
-          <span class="step-badge">1. Pick files</span>
-          <span>➔</span>
-          <span class="step-badge">2. Set PIN</span>
-          <span>➔</span>
-          <span class="step-badge">3. Download</span>
+    <!-- LANDING VIEW: Public, fully visible, search-friendly introduction -->
+    <main id="view-landing" class="view active landing-wrapper" role="main">
+      <div class="home-hero">
+        <div class="hero-section">
+          <span class="hero-eyebrow">✦ Free · No account required</span>
+          <h1 class="hero-title">Share files online.<br><span class="highlight">No login needed.</span></h1>
+          <p class="hero-sub">Send files between your phone, laptop and computer in just a few steps. Choose a file, set a temporary PIN, then share using a QR code or PIN and OTP. Your transfer expires after five minutes.</p>
+          <div class="quick-steps-bar" aria-label="Three quick steps">
+            <span class="step-badge">1. Choose files</span>
+            <span aria-hidden="true">→</span>
+            <span class="step-badge">2. Set PIN</span>
+            <span aria-hidden="true">→</span>
+            <span class="step-badge">3. Share</span>
+          </div>
+        </div>
+        <div class="hero-preview" aria-hidden="true">
+          <div class="preview-top"><span class="preview-mark">✦</span>Quick transfer <span class="preview-status">● Ready</span></div>
+          <div class="preview-transfer">
+            <span class="preview-device">💻</span>
+            <span class="preview-arrow">····➜</span>
+            <span class="preview-device">📱</span>
+          </div>
+          <div class="preview-file">
+            <span class="preview-file-icon">📄</span>
+            <span class="preview-file-copy"><strong>Your files, your devices</strong><small>Scan QR or enter PIN + OTP</small></span>
+            <span class="preview-check">✓</span>
+          </div>
+          <p class="preview-tip">No installation · Temporary sharing</p>
         </div>
       </div>
 
-      <div class="transfer-illustration" aria-hidden="true">
-        <div class="device-icon">💻</div>
-        <div class="transfer-path">
-          <svg viewBox="0 0 120 40" preserveAspectRatio="none"><path class="dotted-line" d="M 8 20 Q 60 -8 112 20" /></svg>
-          <span class="flying-file">📄</span>
-        </div>
-        <div class="device-icon">📱</div>
-      </div>
-
+      <p class="action-choice-label">What would you like to do?</p>
       <div class="split-landing">
-        <div class="split-btn" data-action="send" onclick="navTo('view-send')" role="button" tabindex="0" aria-label="Send files">
-          <svg class="moving-border-svg" aria-hidden="true"><rect rx="20" ry="20" /></svg>
+        <button type="button" class="split-btn" data-action="send" onclick="navTo('view-send')" aria-label="Send files">
           <span class="btn-doodle" aria-hidden="true">📤</span>
-          SEND FILES
-        </div>
-        <div class="split-btn" data-action="receive" onclick="navTo('view-receive')" role="button" tabindex="0" aria-label="Receive files">
-          <svg class="moving-border-svg" aria-hidden="true"><rect rx="20" ry="20" /></svg>
+          <span class="btn-copy">SEND FILES <span class="btn-caption">Upload and get a share code</span></span>
+        </button>
+        <button type="button" class="split-btn" data-action="receive" onclick="navTo('view-receive')" aria-label="Receive files">
           <span class="btn-doodle" aria-hidden="true">📥</span>
-          RECEIVE FILES
-        </div>
+          <span class="btn-copy">RECEIVE FILES <span class="btn-caption">Open with a PIN and OTP</span></span>
+        </button>
       </div>
-    </div>
+    </main>
 
     <!-- SEND VIEW -->
     <div id="view-send" class="view glass-panel">
@@ -375,10 +516,94 @@
       <div id="vault-grid" class="vault-grid" role="list"></div>
     </div>
 
-    <!-- SEO / CRAWLABLE TEXT (Hidden to prevent scrolling) -->
-    <div class="seo-text-block">
-      <h2>Secure, 5-Minute File Sharing</h2>
-      <p>Quickshares.online is a frictionless, temporary file sharing platform designed for speed and privacy. Upload files to generate a secure PIN and OTP. Scan the auto-generated QR code or enter the credentials on any device to instantly receive your files. All transfers are permanently destroyed after 5 minutes or once the download limit is reached. No accounts or software required.</p>
+    <!-- Helpful content is visible to people and search engines on the homepage. -->
+    <div class="seo-text-block landing-only">
+      <div class="trust-row" aria-label="Quickshare features">
+        <span class="trust-pill">✓ No signup needed</span>
+        <span class="trust-pill">▦ QR code transfers</span>
+        <span class="trust-pill">◷ Five-minute sharing</span>
+        <span class="trust-pill">↗ Up to 50 MB per transfer</span>
+      </div>
+
+      <section class="seo-section" id="how-it-works">
+        <p class="section-kicker">How it works</p>
+        <h2>Transfer files between devices in 3 easy steps</h2>
+        <p class="section-lead">Quickshares helps you move files from one device to another without making an account or installing another app. All you need is a modern browser and an internet connection.</p>
+        <div class="guide-grid">
+          <article class="guide-card">
+            <span class="guide-icon" aria-hidden="true">📁</span>
+            <h3>1. Choose your files</h3>
+            <p>Select <strong>Send Files</strong> and pick documents, photos or other files from your device. You can add multiple files as long as the combined size is 50 MB or less.</p>
+          </article>
+          <article class="guide-card">
+            <span class="guide-icon" aria-hidden="true">🔑</span>
+            <h3>2. Set a temporary PIN</h3>
+            <p>Enter a four-digit PIN and choose a download limit. After the upload finishes, Quickshares shows a QR code and an OTP to use on the receiving device.</p>
+          </article>
+          <article class="guide-card">
+            <span class="guide-icon" aria-hidden="true">📲</span>
+            <h3>3. Receive your files</h3>
+            <p>Scan the QR code or open Quickshares on another device, tap <strong>Receive Files</strong>, and enter the PIN and OTP. The sharing session lasts up to five minutes.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="seo-section" id="what-you-can-share">
+        <p class="section-kicker">Made for everyday sharing</p>
+        <h2>A simple way to move files from phone to laptop</h2>
+        <p class="section-lead">Need a document on your laptop that is saved on your phone? Or a photo from one computer on another device? Quickshares is designed for short, browser-based transfers without email attachments or creating a new account.</p>
+        <div class="use-grid">
+          <article class="use-card">
+            <span class="guide-icon" aria-hidden="true">💻</span>
+            <div><h3>Phone to computer</h3><p>Start a transfer on your phone, then scan or enter the sharing credentials on your computer to retrieve the files.</p></div>
+          </article>
+          <article class="use-card">
+            <span class="guide-icon" aria-hidden="true">📷</span>
+            <div><h3>Share with a QR code</h3><p>Show the QR code on the sending screen and scan it from the other device instead of typing a link.</p></div>
+          </article>
+          <article class="use-card">
+            <span class="guide-icon" aria-hidden="true">📄</span>
+            <div><h3>Quick document transfers</h3><p>Move PDFs, photos and common file types through your browser when you need them on a second device.</p></div>
+          </article>
+          <article class="use-card">
+            <span class="guide-icon" aria-hidden="true">⏱️</span>
+            <div><h3>Short-lived sharing</h3><p>Use a transfer that expires after five minutes or once the selected download limit is reached, whichever comes first.</p></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="seo-section" id="faq">
+        <p class="section-kicker">Common questions</p>
+        <h2>File sharing, made straightforward</h2>
+        <div class="faq-list">
+          <details>
+            <summary>Can I share files online without signing up?</summary>
+            <p>Yes. Quickshares does not require you to create an account to send or receive files. Use the Send Files and Receive Files options on the homepage.</p>
+          </details>
+          <details>
+            <summary>How can I transfer files from my phone to my laptop?</summary>
+            <p>Open Quickshares on your phone, tap Send Files, choose files and create a transfer. On your laptop, open the site and enter the displayed PIN and OTP. You can also use the QR code when your receiving device can scan it.</p>
+          </details>
+          <details>
+            <summary>What is the maximum file size?</summary>
+            <p>Quickshares currently supports up to 50 MB in total per transfer, including when you select multiple files.</p>
+          </details>
+          <details>
+            <summary>How long does a file transfer stay available?</summary>
+            <p>The sharing session is designed to expire after five minutes. It may end sooner if it reaches the maximum number of downloads you selected.</p>
+          </details>
+          <details>
+            <summary>Do I need to install an app to receive files?</summary>
+            <p>No. Open Quickshares in a modern web browser, select Receive Files, and enter the PIN and OTP shown to the sender.</p>
+          </details>
+        </div>
+      </section>
+
+      <section class="closing-panel" aria-label="Start sharing files">
+        <h2>Ready to share a file?</h2>
+        <p>No account, no extra download. Start a temporary transfer in your browser.</p>
+        <button type="button" class="home-cta" onclick="navTo('view-send')">Start sharing files →</button>
+      </section>
     </div>
 
     <!-- FOOTER LINKS -->
@@ -405,7 +630,7 @@
   <iframe id="print-frame" style="display:none;" aria-hidden="true"></iframe>
 
   <!-- Performance Fix: Added versioning string to clear old caches -->
-  <script type="module" src="app.js?v=1.0.1"></script>
+  <script type="module" src="app.js?v=1.0.2"></script>
 
   <script>
     (function() {
@@ -414,6 +639,8 @@
         document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active'); });
         var target = document.getElementById(viewId);
         if (target) target.classList.add('active');
+        document.body.classList.toggle('landing-mode', viewId === 'view-landing');
+        window.scrollTo(0, 0);
       };
 
       // Drag and Drop Logic
