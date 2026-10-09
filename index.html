@@ -327,6 +327,10 @@
     body.landing-mode .site-footer a { font-size: .79rem; font-weight: 750; }
     body:not(.landing-mode) .site-footer { display: none; }
     @media (max-width: 750px) {
+      body.landing-mode .split-landing { flex-direction: column; gap: 14px; }
+      body.landing-mode .split-btn { width: 100%; min-height: 124px; padding: 22px 26px; font-size: 1.23rem; }
+      body.landing-mode .split-btn .btn-doodle { width: 62px; height: 62px; font-size: 1.75rem; }
+      body.landing-mode .split-btn .btn-caption { font-size: .89rem; }
       body.landing-mode .app-container { padding: 14px 14px 24px; }
       body.landing-mode .logo { margin-bottom: 15px; }
       .home-hero { grid-template-columns: 1fr; gap: 22px; padding: 29px 22px; border-radius: 25px; }
