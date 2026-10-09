@@ -9,31 +9,31 @@
   </url>
   <!-- How it Works Page (Was missing from the previous sitemap) -->
   <url>
-    <loc>https://quickshares.online/how-to-use.html</loc>
+    <loc>https://quickshares.online/how-to-use</loc>
     <lastmod>2026-09-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quickshares.online/about.html</loc>
+    <loc>https://quickshares.online/about</loc>
     <lastmod>2026-09-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quickshares.online/contact.html</loc>
+    <loc>https://quickshares.online/contact</loc>
     <lastmod>2026-09-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quickshares.online/privacy.html</loc>
+    <loc>https://quickshares.online/privacy</loc>
     <lastmod>2026-09-25</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://quickshares.online/terms.html</loc>
+    <loc>https://quickshares.online/terms</loc>
     <lastmod>2026-09-25</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
