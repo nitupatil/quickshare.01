@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-  <title>How it Works | Quickshares.online</title>
-  <meta name="description" content="Learn how to easily send and receive files using Quickshares.online.">
+  <title>How to Share Files Between Phone & Laptop | Quickshares</title>
+  <meta name="description" content="Learn how to send files online between your phone and computer without signing up. Step-by-step Quickshares guide for QR codes, PIN, OTP and 50 MB transfers.">
   <link rel="canonical" href="https://quickshares.online/how-to-use" />
   <link rel="icon" type="image/jpeg" href="https://i.ibb.co/Rpb7JdYS/gemini-svg-1.jpg">
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -35,7 +35,15 @@
     .step { background: var(--bg-soft); border-radius: var(--radius-md); padding: 20px; margin-bottom: 16px; border: 1px solid var(--card-border); }
     .step-title { font-size: 1.1rem; font-weight: 800; color: var(--primary); margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
     .step-icon { font-size: 1.5rem; }
-    p { color: var(--ink-soft); font-weight: 500; font-size: 0.95rem; }
+    p { color: #50516e; font-weight: 500; font-size: 0.95rem; }
+    .glass-panel { max-width: 800px; }
+    .section-heading { font-size: 1.35rem; font-weight: 900; letter-spacing: -.03em; margin: 28px 0 10px; }
+    .guide-notes { padding: 16px 20px; background: #eef1ff; border: 1px solid #dce3ff; border-radius: 17px; margin: 20px 0; }
+    .faq-item { padding: 14px 0; border-bottom: 1px solid var(--card-border); }
+    .faq-item strong { display: block; margin-bottom: 5px; }
+    .faq-item p { line-height: 1.7; }
+    .related-link { color: var(--primary); font-weight: 800; }
+    @media (max-width: 600px) { .app-container { padding: 18px 12px; } .glass-panel { padding: 28px 18px; } h1 { font-size: 1.65rem; } }
 
     /* Action Button */
     .action-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: var(--primary); color: white; border: none; padding: 18px 24px; width: 100%; border-radius: 14px; font-size: 1.1rem; font-weight: 800; font-family: var(--font); cursor: pointer; text-decoration: none; margin-top: 24px; transition: all 0.3s; box-shadow: 0 6px 20px rgba(63, 94, 255, 0.4); letter-spacing: -0.01em; }
@@ -52,28 +60,45 @@
 
     <div class="glass-panel">
       <a href="/" class="back-link">← back to home</a>
-      <h1>How it Works ✦</h1>
-      <p style="margin-bottom: 24px; font-size: 1rem;">Quickshares makes transferring files between your phone, laptop, and friends completely frictionless.</p>
+      <h1>How to share files online with Quickshares ✦</h1>
+      <p style="margin-bottom: 24px; font-size: 1rem;">Move files between a phone, laptop or computer using a browser. You don't need to create an account or install a dedicated file-sharing application. Follow these steps to send files up to a combined total of 50 MB.</p>
 
       <div class="step">
-        <div class="step-title"><span class="step-icon">📤</span> 1. Select & Secure</div>
-        <p>Drop your files into the upload zone (up to 50MB). Set a temporary 4-digit PIN to secure your transfer and choose how many times the file can be downloaded.</p>
+        <div class="step-title"><span class="step-icon">📤</span> 1. Open Send Files and choose files</div>
+        <p>Go to <a class="related-link" href="https://quickshares.online/">quickshares.online</a>, select <strong>Send Files</strong> and choose photos, PDFs, documents or other files. You can add multiple files, provided the total size is no more than 50 MB.</p>
       </div>
 
       <div class="step">
-        <div class="step-title"><span class="step-icon">🚀</span> 2. Get Your Code</div>
-        <p>Click send! Your files are instantly encrypted and temporarily stored in the cloud. We will give you a magic QR code and a 4-digit OTP.</p>
+        <div class="step-title"><span class="step-icon">🔑</span> 2. Enter a four-digit PIN</div>
+        <p>Set a four-digit PIN and, if needed, choose the maximum number of downloads. The default limit is two downloads. Select <strong>Send</strong> to upload your files.</p>
       </div>
 
       <div class="step">
-        <div class="step-title"><span class="step-icon">📥</span> 3. Catch Your Files</div>
-        <p>On your receiving device, simply scan the QR code with your camera to instantly open the file vault. Or, go to Quickshares.site and manually enter your PIN and OTP.</p>
+        <div class="step-title"><span class="step-icon">📱</span> 3. Scan the QR code or enter PIN and OTP</div>
+        <p>After the upload, Quickshares shows a QR code together with your PIN and an OTP. On your receiving phone, laptop or desktop, scan the code if possible, or open <a class="related-link" href="https://quickshares.online/">quickshares.online</a>, select <strong>Receive Files</strong>, and type the PIN and OTP to open the file vault.</p>
       </div>
 
       <div class="step">
-        <div class="step-title"><span class="step-icon">💨</span> 4. Auto-Destruct</div>
-        <p>Once your timer expires (5 minutes) or your maximum download limit is reached, your files are permanently deleted from our servers forever.</p>
+        <div class="step-title"><span class="step-icon">⏱️</span> 4. Download before the session expires</div>
+        <p>Download the files while the transfer is active. Sharing sessions last up to five minutes and can end earlier when the selected download limit is reached.</p>
       </div>
+
+      <h2 class="section-heading">Transfer files from a phone to a laptop</h2>
+      <p>Start on your Android phone or iPhone, select the files and complete the upload. On your Windows laptop, Mac or another computer, open Quickshares and choose Receive Files. Enter the displayed PIN and OTP to retrieve the transfer. This is useful when you don't want to email attachments to yourself.</p>
+
+      <h2 class="section-heading">Transfer files from a laptop to a phone</h2>
+      <p>On the laptop, select Send Files and finish the upload. Then scan the QR code from your phone's camera, or open Quickshares on your phone and enter the PIN and OTP manually. Download the files before the session expires.</p>
+
+      <div class="guide-notes">
+        <strong>Things to know</strong>
+        <p>Both devices need a working internet connection. Keep your PIN and OTP private, share them only with the intended recipient, and finish downloading before the five-minute timer runs out. The transfer limit is 50 MB in total, not 50 MB per file.</p>
+      </div>
+
+      <h2 class="section-heading">Common questions</h2>
+      <div class="faq-item"><strong>Do I need to sign up?</strong><p>No, Quickshares can send and receive files without an account.</p></div>
+      <div class="faq-item"><strong>Why can't I open a transfer?</strong><p>Check the PIN and OTP carefully and confirm the sharing timer hasn't expired or the download limit hasn't been reached. If the session ended, the sender needs to start another transfer.</p></div>
+      <div class="faq-item"><strong>Can I send multiple files?</strong><p>Yes. You can choose multiple files, up to 50 MB combined.</p></div>
+      <div class="faq-item"><strong>Can I use the site on mobile?</strong><p>Yes. Use a modern browser on your phone. No additional Quickshares app is required.</p></div>
 
       <a href="/" class="action-btn">Start Sharing Files ✦</a>
     </div>

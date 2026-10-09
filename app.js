@@ -35,6 +35,10 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // --- SILENT ANALYTICS TRACKER ---
 // This function logs events to the database without blocking the UI
 async function logEvent(eventType) {
+    // Track interaction milestones in GA4 without filenames, PINs or OTPs.
+    if (eventType !== 'page_view' && typeof window.gtag === 'function') {
+        window.gtag('event', 'qs_' + eventType);
+    }
     try {
         await supabase.from('analytics').insert([{ event_type: eventType }]);
     } catch (error) {
@@ -60,6 +64,7 @@ window.navTo = function(viewId, pushHistory = true) {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     const target = document.getElementById(viewId);
     if (target) target.classList.add('active');
+    document.body.classList.toggle('landing-mode', viewId === 'view-landing');
     
     // Log navigation clicks for analytics
     if (viewId === 'view-send') logEvent('click_send');
