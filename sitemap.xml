@@ -3,14 +3,14 @@
   <!-- Homepage (Highly optimized for SEO) -->
   <url>
     <loc>https://quickshares.online/</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-11-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <!-- How it Works Page (Was missing from the previous sitemap) -->
   <url>
     <loc>https://quickshares.online/how-to-use</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-11-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -37,5 +37,23 @@
     <lastmod>2026-09-25</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://quickshares.online/phone-to-laptop-file-transfer</loc>
+    <lastmod>2026-11-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://quickshares.online/share-files-with-qr-code</loc>
+    <lastmod>2026-11-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://quickshares.online/temporary-file-sharing</loc>
+    <lastmod>2026-11-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
   </url>
 </urlset>
